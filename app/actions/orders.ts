@@ -47,7 +47,28 @@ export async function createOrder(
 
     const restaurant_id = table.restaurant_id;
 
-    // 3. Validate menu items exist and fetch current prices
+    // 3. ENFORCEMENT: Check if restaurant menu is enabled
+    const { data: restaurant, error: restaurantError } = await supabase
+      .from("restaurants")
+      .select("menu_enabled, enforcement_reason")
+      .eq("id", restaurant_id)
+      .single();
+
+    if (restaurantError || !restaurant) {
+      return {
+        success: false,
+        error: "Restaurant not found",
+      };
+    }
+
+    if (!restaurant.menu_enabled) {
+      return {
+        success: false,
+        error: restaurant.enforcement_reason || "Orders are currently unavailable. Please contact staff.",
+      };
+    }
+
+    // 4. Validate menu items exist and fetch current prices
     // This ensures we use database prices, not client-provided prices
     const menuItemIds = validatedInput.items.map((item) => item.id);
     
@@ -73,7 +94,7 @@ export async function createOrder(
       };
     }
 
-    // 4. Match client items with database items and validate prices
+    // 5. Match client items with database items and validate prices
     // Create a map for quick lookup
     const menuItemMap = new Map(menuItems.map((item) => [item.id, item]));
     
@@ -93,16 +114,16 @@ export async function createOrder(
       };
     });
 
-    // 5. Calculate subtotal using validated database prices
+    // 6. Calculate subtotal using validated database prices
     const subtotal = validatedItems.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
 
-    // 6. Calculate pricing (VAT, tip, total, commission) server-side
+    // 7. Calculate pricing (VAT, tip, total, commission) server-side
     const pricing = calculateOrderPricing(subtotal);
 
-    // 7. Insert order into database
+    // 8. Insert order into database
     const { data: order, error: orderError } = await supabase
       .from("orders")
       .insert({

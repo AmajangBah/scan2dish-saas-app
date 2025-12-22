@@ -55,12 +55,19 @@ export default function BrowsePage() {
         // 1) Resolve restaurant_id from the table_id (public-read allowed for active tables)
         const { data: tableRow, error: tableError } = await supabase
           .from("restaurant_tables")
-          .select("restaurant_id")
+          .select("restaurant_id, restaurants!inner(menu_enabled, enforcement_reason)")
           .eq("id", tableId)
           .single();
 
         if (tableError || !tableRow?.restaurant_id) {
           throw new Error("Table not found or inactive");
+        }
+
+        // ENFORCEMENT: Check if menu is enabled
+        const restaurant = tableRow.restaurants;
+        if (!restaurant?.menu_enabled) {
+          const reason = restaurant?.enforcement_reason || "Menus are currently unavailable. Please contact staff.";
+          throw new Error(reason);
         }
 
         // 2) Fetch menu items for this restaurant
