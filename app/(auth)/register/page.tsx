@@ -2,14 +2,13 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import { useState } from "react";
 
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
@@ -18,21 +17,20 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Route from "@/app/constants/Route";
 
+import { createBrowserSupabase } from "@/lib/supabase/client";
+import { z } from "zod";
+
 // ----------------------
-// ✅ ZOD SCHEMA
+// ZOD SCHEMA
 // ----------------------
-const SignupFormSchema = z
+export const SignupFormSchema = z
   .object({
     businessName: z.string().min(1, "Business name is required"),
     email: z
       .string()
       .min(1, "Email is required")
-      .email("Invalid email address")
-      .max(255, "Email too long"),
-    phone: z
-      .string()
-      .min(10, "Phone number must be at least 10 digits")
-      .max(15, "Phone number too long"),
+      .email("Invalid email address"),
+    phone: z.string().min(8, "Phone number must be at least 10 digits"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(6, "Confirm your password"),
   })
@@ -41,12 +39,17 @@ const SignupFormSchema = z
     message: "Passwords do not match",
   });
 
-type SignupValues = z.infer<typeof SignupFormSchema>;
+export type SignupValues = z.infer<typeof SignupFormSchema>;
 
 // ----------------------
-// ✅ UI COMPONENT
+// COMPONENT
 // ----------------------
 const SignupPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const supabase = createBrowserSupabase();
+
   const form = useForm<SignupValues>({
     resolver: zodResolver(SignupFormSchema),
     defaultValues: {
@@ -58,13 +61,45 @@ const SignupPage = () => {
     },
   });
 
-  function onSubmit(values: SignupValues) {
-    console.log("Form Submitted:", values);
+  async function onSubmit(values: SignupValues) {
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      // 1️⃣ Sign up user
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) throw error;
+      if (!data.user) throw new Error("User not created");
+
+      const userId = data.user.id;
+
+      // 2️⃣ Insert restaurant row (RLS safe)
+      const { error: dbError } = await supabase.from("restaurants").insert([
+        {
+          user_id: userId,
+          name: values.businessName,
+          phone: values.phone,
+          brand_color: "#C84501",
+        },
+      ]);
+
+      if (dbError) throw dbError;
+
+      alert("Account created! Check your email for confirmation.");
+      form.reset();
+    } catch (err: any) {
+      setErrorMsg(err.message || "Signup failed. Try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="max-w-md mx-auto py-10">
-      {/* HEADER */}
       <div className="text-center space-y-2 mb-10">
         <Link href={Route.HOME}>
           <h1 className="text-4xl font-bold">
@@ -72,19 +107,21 @@ const SignupPage = () => {
             <span className="text-[#C84501]">2Dish</span>
           </h1>
         </Link>
-
         <p className="text-gray-600 text-center my-4 text-2xl">
           Welcome, create your account to get started
         </p>
       </div>
 
-      {/* SIGNUP TITLE */}
       <h2 className="text-xl font-semibold mb-4">Sign Up</h2>
 
-      {/* FORM */}
+      {errorMsg && (
+        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+          {errorMsg}
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          {/* Business Name */}
           <FormField
             control={form.control}
             name="businessName"
@@ -102,7 +139,6 @@ const SignupPage = () => {
             )}
           />
 
-          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -120,7 +156,6 @@ const SignupPage = () => {
             )}
           />
 
-          {/* Phone */}
           <FormField
             control={form.control}
             name="phone"
@@ -138,7 +173,6 @@ const SignupPage = () => {
             )}
           />
 
-          {/* Password */}
           <FormField
             control={form.control}
             name="password"
@@ -157,7 +191,6 @@ const SignupPage = () => {
             )}
           />
 
-          {/* Confirm Password */}
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -176,24 +209,24 @@ const SignupPage = () => {
             )}
           />
 
-          {/* SUBMIT BUTTON */}
           <Button
             type="submit"
             className="w-full bg-orange-700 hover:bg-orange-800 text-white rounded-xl p-5 text-lg"
+            disabled={loading}
           >
-            Sign Up
+            {loading ? "Signing Up..." : "Sign Up"}
           </Button>
         </form>
       </Form>
 
-      {/* Login Link */}
       <p className="text-center text-gray-600 mt-4">
         Already have an account?{" "}
         <Link href={Route.LOGINPAGE} className="text-[#C84501] font-medium">
-          Login in
+          Log in
         </Link>
       </p>
     </div>
   );
 };
+
 export default SignupPage;

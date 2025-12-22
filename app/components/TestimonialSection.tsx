@@ -52,7 +52,7 @@ const TestimonialSection = () => {
       </div>
 
       {/* Stacked Cards */}
-      <div className="relative w-full mt-10 flex justify-center items-center h-[380px] md:h-400px]">
+      <div className="relative w-full mt-10 flex justify-center items-center h-[380px] ">
         {/* Back */}
         <div className="absolute top-0 scale-90 opacity-60 z-10 hidden sm:block">
           <TestimonialSectionCard {...cards[2]} />
@@ -64,24 +64,26 @@ const TestimonialSection = () => {
         </div>
 
         {/* Front */}
-        <div className="absolute top-12 scale-100 z-30 w-full max-w-sm sm:max-w-none">
+        <div className="absolute top-12 scale-100 z-30 w-full max-w-sm sm:block">
           <TestimonialSectionCard {...cards[0]} />
         </div>
       </div>
 
       {/* NEXT BUTTON */}
-      <Button
-        onClick={nextCard}
-        className="mt-8 p-3 rounded-full bg-white/20 backdrop-blur-md border border-white text-white"
-      >
-        ➜
-      </Button>
-      <Button
-        onClick={backCard}
-        className="mt-8 p-3 rounded-full bg-white/20 backdrop-blur-md border border-white text-white"
-      >
-        ←-
-      </Button>
+      <div className="flex flex-row gap-2">
+        <Button
+          onClick={nextCard}
+          className="mt-8 p-3 rounded-full bg-white/20 backdrop-blur-md border border-white text-white"
+        >
+          ⟹
+        </Button>
+        <Button
+          onClick={backCard}
+          className="mt-8 p-3 rounded-full bg-white/20 backdrop-blur-md border border-white text-white"
+        >
+          ⟸
+        </Button>
+      </div>
 
       <div className="mt-10">
         <Button className="text-white border border-white py-2 px-2 bg-transparent cursor-pointer hover:bg-white hover:text-[#D35A0F]">

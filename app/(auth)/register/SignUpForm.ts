@@ -7,7 +7,7 @@ export const SignupFormSchema = z
       .string()
       .min(1, "Email is required")
       .email("Invalid email address")
-      .max(255, "Email must be less than 256 characters"),
+      .max(255, "Email too long"),
     phone: z
       .string()
       .min(10, "Phone number must be at least 10 digits")
@@ -19,3 +19,5 @@ export const SignupFormSchema = z
     path: ["confirmPassword"],
     message: "Passwords do not match",
   });
+
+export type SignupValues = z.infer<typeof SignupFormSchema>;

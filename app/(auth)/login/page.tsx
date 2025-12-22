@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useState } from "react";
 
 import {
   Form,
@@ -17,8 +18,10 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Route from "@/app/constants/Route";
 
+import { createBrowserSupabase } from "@/lib/supabase/client";
+
 // ----------------------
-// ✅ ZOD SCHEMA
+// ZOD SCHEMA
 // ----------------------
 const LoginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -28,9 +31,12 @@ const LoginSchema = z.object({
 type LoginValues = z.infer<typeof LoginSchema>;
 
 // ----------------------
-// ✅ UI COMPONENT
+// COMPONENT
 // ----------------------
 export default function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -39,8 +45,24 @@ export default function LoginPage() {
     },
   });
 
-  function onSubmit(values: LoginValues) {
-    console.log("LOGIN:", values);
+  async function onSubmit(values: LoginValues) {
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) throw error;
+
+      window.location.href = Route.DASHBOARD;
+    } catch (err: any) {
+      setErrorMsg(err.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -54,15 +76,20 @@ export default function LoginPage() {
           </h1>
         </Link>
 
-        <p className="text-gray-600 text-2xl text-center my-4">
-          Welcome back login to continue to view your orders
+        <p className="text-gray-600 text-2xl my-4">
+          Welcome back, login to continue to view your orders
         </p>
       </div>
 
-      {/* TITLE */}
       <h2 className="text-xl font-semibold mb-4">Login</h2>
 
-      {/* FORM */}
+      {/* ERROR */}
+      {errorMsg && (
+        <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+          {errorMsg}
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Email */}
@@ -102,17 +129,17 @@ export default function LoginPage() {
             )}
           />
 
-          {/* SUBMIT BUTTON */}
+          {/* Submit */}
           <Button
             type="submit"
             className="w-full bg-[#C84501] hover:bg-orange-800 text-white rounded-xl p-5 text-lg"
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
       </Form>
 
-      {/* FOOTER */}
       <p className="text-center text-gray-600 mt-4">
         Don't have an account?{" "}
         <Link href={Route.SIGNUPAGE} className="text-[#C84501] font-medium">
