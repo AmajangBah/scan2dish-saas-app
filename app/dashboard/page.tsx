@@ -4,33 +4,97 @@ import Route from "../constants/Route";
 import { ShoppingBag, DollarSign, Utensils, Timer } from "lucide-react";
 import ActivityFeed from "../components/ActivityFeed";
 import { ActivityItem } from "@/types/activity";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { getRestaurantId } from "@/lib/getRestaurantId";
 
-const Dashboard = () => {
-  const RestaurantName = "Amie's Kitchen";
-  const activityData: ActivityItem[] = [
-    {
-      id: "1",
-      table: 4,
-      time: "12:45 PM",
-      items: [
-        { name: "Burger", quantity: 2, price: 5.99 },
-        { name: "Fries", quantity: 1, price: 2.99 },
-      ],
-    },
-    {
-      id: "2",
-      table: 1,
-      time: "1:10 PM",
-      items: [{ name: "Pasta Alfredo", quantity: 1, price: 8.5 }],
-    },
-  ];
+export default async function Dashboard() {
+  const restaurant_id = await getRestaurantId();
+
+  if (!restaurant_id) {
+    return (
+      <section className="p-6 w-full">
+        <div className="text-center text-red-600">
+          Unable to load dashboard. Please log in again.
+        </div>
+      </section>
+    );
+  }
+
+  const supabase = createServerSupabase();
+
+  // Fetch restaurant name
+  const { data: restaurant } = await supabase
+    .from("restaurants")
+    .select("name")
+    .eq("id", restaurant_id)
+    .single();
+
+  const restaurantName = restaurant?.name || "Restaurant";
+
+  // Fetch dashboard stats
+  const { count: totalOrders } = await supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("restaurant_id", restaurant_id);
+
+  const { data: revenueData } = await supabase
+    .from("orders")
+    .select("total")
+    .eq("restaurant_id", restaurant_id)
+    .eq("status", "completed");
+
+  const revenue =
+    revenueData?.reduce((sum, o) => sum + Number(o.total || 0), 0) || 0;
+
+  const { count: activeTables } = await supabase
+    .from("restaurant_tables")
+    .select("id", { count: "exact", head: true })
+    .eq("restaurant_id", restaurant_id)
+    .eq("is_active", true);
+
+  const { count: pendingOrders } = await supabase
+    .from("orders")
+    .select("id", { count: "exact", head: true })
+    .eq("restaurant_id", restaurant_id)
+    .in("status", ["pending", "preparing"]);
+
+  // Fetch recent activity (last 5 orders)
+  const { data: recentOrders } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      items,
+      created_at,
+      restaurant_tables!inner(table_number)
+    `)
+    .eq("restaurant_id", restaurant_id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  const activityData: ActivityItem[] =
+    recentOrders?.map((order) => {
+      const items = Array.isArray(order.items) ? order.items : [];
+      return {
+        id: order.id,
+        table: parseInt(order.restaurant_tables?.table_number || "0"),
+        time: new Date(order.created_at).toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+        items: items.map((item: any) => ({
+          name: item.name || "Unknown",
+          quantity: item.quantity || 1,
+          price: parseFloat(item.price) || 0,
+        })),
+      };
+    }) || [];
 
   return (
     <section className="p-6 w-full space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold my-4">
-          Welcome back 👋 {RestaurantName}
+          Welcome back 👋 {restaurantName}
         </h1>
         <p className="text-gray-600 text-sm">
           Here's the latest overview of your restaurant performance
@@ -41,25 +105,25 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         <DashboardCard
           heading="Total Orders"
-          figure={2100}
+          figure={totalOrders || 0}
           accent="orange"
           icon={<ShoppingBag />}
         />
         <DashboardCard
           heading="Revenue"
-          figure={34000}
+          figure={Math.round(revenue)}
           accent="green"
           icon={<DollarSign />}
         />
         <DashboardCard
           heading="Active Tables"
-          figure={21}
+          figure={activeTables || 0}
           accent="blue"
           icon={<Utensils />}
         />
         <DashboardCard
           heading="Pending Orders"
-          figure={14}
+          figure={pendingOrders || 0}
           accent="red"
           icon={<Timer />}
         />
@@ -75,9 +139,8 @@ const Dashboard = () => {
           <DashboardCard heading="Add More Menu Items" isAddCard />
         </Link>
       </div>
-      <ActivityFeed activities={activityData} />
+      
+      {activityData.length > 0 && <ActivityFeed activities={activityData} />}
     </section>
   );
-};
-
-export default Dashboard;
+}
