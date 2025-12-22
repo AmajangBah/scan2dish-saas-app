@@ -1,76 +1,69 @@
-"use client";
+import { createServerSupabase } from "@/lib/supabase/server";
+import { getRestaurantId } from "@/lib/getRestaurantId";
+import OrdersClient from "./OrdersClient";
+import { Order } from "./types";
 
-import { useState } from "react";
-import SearchBar from "./components/SearchBar";
-import Pagination from "./components/Pagination";
-import OrderCard from "./components/OrderCard";
-import OrderDetailsModal from "./components/OrderDetailsModal";
-import { Order, OrderStatus } from "./types";
-import { mockOrders } from "./mockOrders";
-
-export default function OrdersPage() {
-  const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const ITEMS_PER_PAGE = 6;
-
-  const filtered = orders.filter((o) =>
-    o.table.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const start = (currentPage - 1) * ITEMS_PER_PAGE;
-  const paginated = filtered.slice(start, start + ITEMS_PER_PAGE);
-
-  const handleView = (order: Order) => {
-    setSelectedOrder(order);
-    setModalOpen(true);
-  };
-
-  const handleStatusChange = (id: number, newStatus: OrderStatus) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === id ? { ...o, status: newStatus } : o))
+export default async function OrdersPage() {
+  const restaurant_id = await getRestaurantId();
+  
+  if (!restaurant_id) {
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="text-center text-red-600">
+          Unable to load restaurant data. Please log in again.
+        </div>
+      </div>
     );
-  };
+  }
 
-  return (
-    <div className="p-6 bg-gray-50 min-h-screen space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800 text-center">Orders</h1>
+  const supabase = createServerSupabase();
 
-      <div className="max-w-md mx-auto">
-        <SearchBar value={search} onChange={setSearch} />
+  // Fetch orders with table information
+  const { data: orders, error } = await supabase
+    .from("orders")
+    .select(`
+      id,
+      status,
+      total,
+      items,
+      created_at,
+      restaurant_tables!inner(table_number)
+    `)
+    .eq("restaurant_id", restaurant_id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Failed to fetch orders:", error);
+    return (
+      <div className="p-6 bg-gray-50 min-h-screen">
+        <div className="text-center text-red-600">
+          Failed to load orders. Please try again later.
+        </div>
       </div>
+    );
+  }
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        {paginated.map((order) => (
-          <OrderCard
-            key={order.id}
-            order={order}
-            onView={handleView}
-            onStatusChange={handleStatusChange}
-          />
-        ))}
-      </div>
+  // Map database orders to UI Order type
+  const mappedOrders: Order[] = (orders || []).map((o) => {
+    const items = Array.isArray(o.items) ? o.items : [];
+    const orderItems = items.map((item: any) => ({
+      name: item.name || "Unknown Item",
+      qty: item.quantity || 1,
+      price: parseFloat(item.price) || 0,
+    }));
 
-      {paginated.length === 0 && (
-        <p className="text-center text-gray-400 mt-12">No orders found.</p>
-      )}
+    return {
+      id: o.id,
+      table: o.restaurant_tables?.table_number || "Unknown",
+      status: o.status as "pending" | "preparing" | "completed",
+      total: parseFloat(o.total || 0).toFixed(2),
+      time: new Date(o.created_at).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      items: orderItems,
+    };
+  });
 
-      <Pagination
-        currentPage={currentPage}
-        totalItems={filtered.length}
-        itemsPerPage={ITEMS_PER_PAGE}
-        onPageChange={setCurrentPage}
-      />
-
-      <OrderDetailsModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        order={selectedOrder}
-        onStatusChange={handleStatusChange}
-      />
-    </div>
-  );
+  return <OrdersClient initialOrders={mappedOrders} />;
 }
