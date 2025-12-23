@@ -1,49 +1,39 @@
-"use client";
+import {
+  getAnalyticsKPIs,
+  getTopSellingItems,
+  getCategorySales,
+  getWeeklySales,
+} from "@/app/actions/analytics";
+import { getRestaurantId } from "@/lib/getRestaurantId";
+import AnalyticsClient from "./AnalyticsClient";
 
-import { useState } from "react";
+export default async function AnalyticsPage() {
+  const restaurant_id = await getRestaurantId();
 
-import Header from "./components/Header";
-import WeeklySales from "./components/WeeklySalesChart";
-import KpiSection from "./components/KpiSection";
-import CategoryChart from "./components/CategorySalesChart";
-import TopProducts from "./components/TopSellingTable";
-import RevenueCard from "./components/RevenueCard";
+  if (!restaurant_id) {
+    return (
+      <div className="p-6 min-h-screen">
+        <div className="text-center text-red-600">
+          Unable to load restaurant data. Please log in again.
+        </div>
+      </div>
+    );
+  }
 
-import { currentWeek, lastWeek } from "./data";
-
-export default function AnalyticsPage() {
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [selectedRange, setSelectedRange] = useState<any>(null);
+  // Fetch all analytics data in parallel
+  const [kpis, topItems, categorySales, weeklySales] = await Promise.all([
+    getAnalyticsKPIs(),
+    getTopSellingItems(5),
+    getCategorySales(),
+    getWeeklySales(),
+  ]);
 
   return (
-    <div className="space-y-10">
-      <Header
-        onMonthChange={setSelectedMonth}
-        onRangeChange={setSelectedRange}
-      />
-
-      {/* Weekly Sales + Revenue */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2">
-          <WeeklySales month={selectedMonth} range={selectedRange} />
-        </div>
-
-        <RevenueCard month={selectedMonth} range={selectedRange} />
-      </div>
-
-      {/* KPIs */}
-      <KpiSection month={selectedMonth} range={selectedRange} />
-
-      {/* Category Chart */}
-      <CategoryChart month={selectedMonth} range={selectedRange} />
-
-      {/* Top Selling */}
-      <TopProducts
-        currentWeek={currentWeek}
-        lastWeek={lastWeek}
-        month={selectedMonth}
-        range={selectedRange}
-      />
-    </div>
+    <AnalyticsClient
+      kpis={kpis}
+      topItems={topItems}
+      categorySales={categorySales}
+      weeklySales={weeklySales}
+    />
   );
 }

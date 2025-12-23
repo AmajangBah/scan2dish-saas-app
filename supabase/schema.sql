@@ -63,8 +63,10 @@ create table if not exists public.restaurants (
   name text not null,
   phone text,
   brand_color text not null default '#C84501',
+  currency text not null default 'GMD',
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint restaurants_currency_check check (currency in ('USD', 'EUR', 'GBP', 'GMD', 'XOF', 'NGN', 'GHS', 'ZAR', 'KES'))
 );
 
 do $$
@@ -419,6 +421,59 @@ with check (
     select 1
     from public.restaurants r
     where r.id = discounts.restaurant_id
+      and r.user_id = auth.uid()
+  )
+);
+
+-- -----------------------------------------------------------------------------
+-- onboarding_progress
+-- -----------------------------------------------------------------------------
+create table if not exists public.onboarding_progress (
+  id uuid primary key default gen_random_uuid(),
+  restaurant_id uuid not null unique references public.restaurants(id) on delete cascade,
+  current_step integer not null default 1,
+  completed boolean not null default false,
+  steps_completed jsonb not null default '[]'::jsonb,
+  skipped boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint onboarding_progress_step_range check (current_step between 1 and 7),
+  constraint onboarding_progress_steps_is_array check (jsonb_typeof(steps_completed) = 'array')
+);
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_trigger where tgname = 'trg_onboarding_progress_set_updated_at'
+  ) then
+    create trigger trg_onboarding_progress_set_updated_at
+    before update on public.onboarding_progress
+    for each row execute function public.set_updated_at();
+  end if;
+end $$;
+
+create index if not exists idx_onboarding_progress_restaurant_id on public.onboarding_progress(restaurant_id);
+
+alter table public.onboarding_progress enable row level security;
+
+drop policy if exists onboarding_progress_owner_all on public.onboarding_progress;
+create policy onboarding_progress_owner_all
+on public.onboarding_progress
+for all
+to authenticated
+using (
+  exists (
+    select 1
+    from public.restaurants r
+    where r.id = onboarding_progress.restaurant_id
+      and r.user_id = auth.uid()
+  )
+)
+with check (
+  exists (
+    select 1
+    from public.restaurants r
+    where r.id = onboarding_progress.restaurant_id
       and r.user_id = auth.uid()
   )
 );

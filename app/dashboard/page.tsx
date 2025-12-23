@@ -6,6 +6,7 @@ import ActivityFeed from "../components/ActivityFeed";
 import { ActivityItem } from "@/types/activity";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { getRestaurantId } from "@/lib/getRestaurantId";
+import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
 
 export default async function Dashboard() {
   const restaurant_id = await getRestaurantId();
@@ -91,6 +92,9 @@ export default async function Dashboard() {
 
   return (
     <section className="p-6 w-full space-y-6">
+      {/* Onboarding Wizard */}
+      <OnboardingWizard />
+      
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold my-4">
