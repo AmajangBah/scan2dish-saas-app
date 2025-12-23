@@ -1,11 +1,29 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { locales, defaultLocale } from "./i18n";
+
+// Create i18n middleware
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: "as-needed", // Don't add /en prefix for default locale
+});
 
 /**
- * Middleware to protect authenticated routes
- * Redirects unauthenticated users to login page
+ * Middleware to:
+ * 1. Handle internationalization (i18n)
+ * 2. Protect authenticated routes
+ * 3. Refresh Supabase session
  */
 export async function middleware(request: NextRequest) {
+  // Handle i18n first
+  const intlResponse = intlMiddleware(request);
+  
+  // If i18n middleware wants to redirect, let it
+  if (intlResponse && intlResponse.headers.get("x-middleware-rewrite")) {
+    return intlResponse;
+  }
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -64,14 +82,9 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     * - api routes (they handle their own auth)
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Enable i18n routing on all paths except static files
+    "/((?!api|_next|_vercel|.*\\..*).*)",
+    // Also match root
+    "/",
   ],
 };

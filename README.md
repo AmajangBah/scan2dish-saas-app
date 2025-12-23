@@ -8,6 +8,7 @@ A modern, fast, and user-friendly platform that enables restaurants to offer con
 
 ## ✨ Features
 
+### Core Features
 - 🔐 **Restaurant Authentication** - Secure signup and login for restaurant owners
 - 📱 **QR Code Ordering** - Customers scan table QR codes to access the menu
 - 🍔 **Menu Management** - Full CRUD operations for menu items with categories, variants, and tags
@@ -17,6 +18,12 @@ A modern, fast, and user-friendly platform that enables restaurants to offer con
 - 🎉 **Discounts** - Create and manage promotional discounts
 - ⚙️ **Settings** - Configure business profile and branding
 - 🔒 **Row Level Security** - Supabase RLS ensures data isolation
+
+### 🆕 New Features
+- 🌍 **Multi-Language Support** - English, French, Spanish (400+ translated strings)
+- 💰 **Multi-Currency Support** - 9 currencies: USD, EUR, GBP, GMD, XOF, NGN, GHS, ZAR, KES
+- 🎓 **Onboarding Wizard** - 7-step guided setup for new restaurant owners
+- 💵 **Commission Transparency** - Clear 5% commission explanation with examples
 
 ---
 
@@ -103,10 +110,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 1. **Sign Up**: Go to `/register` and create an account
 2. **Confirm Email**: Check your email and click the confirmation link
 3. **Login**: Go to `/login` and sign in
-4. **Add Tables**: Navigate to Tables → Create tables for your restaurant
-5. **Add Menu Items**: Navigate to Menu → Add dishes with prices and images
-6. **Generate QR Codes**: Click "View QR" on any table to generate/download QR code
-7. **View Orders**: Check the Orders page for incoming orders
+4. **Complete Onboarding**: Follow the 7-step wizard:
+   - Welcome & introduction
+   - Understand 5% commission model
+   - Set up business profile (name, phone, currency, branding)
+   - Add first table
+   - Build your menu
+   - Generate QR codes
+   - Celebrate completion! 🎉
+5. **Start Receiving Orders**: Customers can now order through QR codes
+6. **Manage Orders**: Update status, track performance
+7. **Switch Languages**: Use language switcher (🇬🇧 🇫🇷 🇪🇸) in navbar
 
 ### Customer Flow:
 
@@ -154,7 +168,14 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🐛 Known Issues & Roadmap
 
-See `BUGS_FIXED.md` for recently fixed issues.
+See `BUGS_FIXED.md` for recently fixed issues.  
+See `NEW_FEATURES_SUMMARY.md` for recently added features.
+
+### ✅ Recently Added:
+- ✅ Multi-language support (EN, FR, ES)
+- ✅ Multi-currency support (9 currencies)
+- ✅ Onboarding wizard (7 steps)
+- ✅ Commission transparency
 
 ### Future Enhancements:
 - [ ] Payment integration (Stripe)
@@ -162,7 +183,8 @@ See `BUGS_FIXED.md` for recently fixed issues.
 - [ ] Real-time order notifications
 - [ ] Customer email receipts
 - [ ] Opening hours enforcement
-- [ ] Multi-language support
+- [ ] More languages (Arabic, Portuguese, Chinese)
+- [ ] More currencies (regional additions)
 
 ---
 

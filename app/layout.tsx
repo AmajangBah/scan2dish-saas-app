@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,17 +20,25 @@ export const metadata: Metadata = {
     "Boost efficiency with Scan2Dish — a fast, user-friendly QR code menu & ordering system. Let customers scan, order, and pay directly from their table. Ideal for restaurants, cafés, lounges, and hotels. Easy setup, real-time tracking, and perfect for non-tech-savvy users",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  params,
 }: Readonly<{
   children: React.ReactNode;
+  params: { locale?: string };
 }>) {
+  // Get messages for the current locale
+  const locale = params?.locale || "en";
+  const messages = await getMessages({ locale });
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   );

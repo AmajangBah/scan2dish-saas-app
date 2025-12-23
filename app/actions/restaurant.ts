@@ -13,6 +13,7 @@ const UpdateBusinessProfileSchema = z.object({
   name: z.string().min(1, "Restaurant name is required").max(100),
   phone: z.string().min(8, "Phone must be at least 8 digits").max(20).optional().nullable(),
   brand_color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format").optional(),
+  currency: z.enum(['USD', 'EUR', 'GBP', 'GMD', 'XOF', 'NGN', 'GHS', 'ZAR', 'KES']).optional(),
 });
 
 const UpdateBrandingSchema = z.object({
@@ -62,6 +63,10 @@ export async function updateBusinessProfile(
 
     if (validated.brand_color !== undefined) {
       updateData.brand_color = validated.brand_color;
+    }
+
+    if (validated.currency !== undefined) {
+      updateData.currency = validated.currency;
     }
 
     const { data, error } = await supabase
@@ -147,7 +152,7 @@ export async function getRestaurantProfile(): Promise<RestaurantActionResult> {
 
     const { data, error } = await supabase
       .from("restaurants")
-      .select("id, name, phone, brand_color, created_at")
+      .select("id, name, phone, brand_color, currency, created_at")
       .eq("id", restaurant_id)
       .single();
 

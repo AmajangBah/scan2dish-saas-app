@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Upload, Camera, Globe, MapPin, Phone, Mail } from "lucide-react";
 import { useState, useEffect } from "react";
 import { updateBusinessProfile, getRestaurantProfile } from "@/app/actions/restaurant";
+import { getCurrencyOptions } from "@/lib/utils/currency";
 
 export default function BusinessProfile() {
   const [loading, setLoading] = useState(false);
@@ -23,7 +24,10 @@ export default function BusinessProfile() {
     website: "",
     address: "",
     description: "",
+    currency: "GMD",
   });
+
+  const currencyOptions = getCurrencyOptions();
 
   // Load restaurant profile on mount
   useEffect(() => {
@@ -35,6 +39,7 @@ export default function BusinessProfile() {
           ...prev,
           name: result.data.name || "",
           phone: result.data.phone || "",
+          currency: result.data.currency || "GMD",
         }));
       }
       setLoading(false);
@@ -62,6 +67,7 @@ export default function BusinessProfile() {
     const result = await updateBusinessProfile({
       name: formData.name,
       phone: formData.phone || null,
+      currency: formData.currency as any,
     });
 
     setSaving(false);
@@ -162,6 +168,30 @@ export default function BusinessProfile() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label>Currency *</Label>
+                <select
+                  name="currency"
+                  className="w-full p-2 border rounded-lg"
+                  value={formData.currency}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, currency: e.target.value }))
+                  }
+                  required
+                >
+                  {currencyOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-muted-foreground">
+                  Used for menu prices and reports
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label>Website</Label>
                 <div className="relative">

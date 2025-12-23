@@ -91,6 +91,7 @@ const SignupPage = () => {
           name: values.businessName,
           phone: values.phone,
           brand_color: "#C84501",
+          currency: "GMD", // Default currency
         },
       ]);
 
