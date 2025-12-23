@@ -1,0 +1,167 @@
+"use server";
+
+import { createServerSupabase } from "@/lib/supabase/server";
+import { getRestaurantId } from "@/lib/getRestaurantId";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+// ============================================================================
+// VALIDATION SCHEMAS
+// ============================================================================
+
+const UpdateBusinessProfileSchema = z.object({
+  name: z.string().min(1, "Restaurant name is required").max(100),
+  phone: z.string().min(8, "Phone must be at least 8 digits").max(20).optional().nullable(),
+  brand_color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format").optional(),
+});
+
+const UpdateBrandingSchema = z.object({
+  brand_color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format"),
+});
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export type UpdateBusinessProfileInput = z.infer<typeof UpdateBusinessProfileSchema>;
+export type UpdateBrandingInput = z.infer<typeof UpdateBrandingSchema>;
+
+export interface RestaurantActionResult {
+  success: boolean;
+  error?: string;
+  data?: any;
+}
+
+// ============================================================================
+// ACTIONS
+// ============================================================================
+
+/**
+ * Update restaurant business profile (name, phone)
+ */
+export async function updateBusinessProfile(
+  input: UpdateBusinessProfileInput
+): Promise<RestaurantActionResult> {
+  try {
+    const validated = UpdateBusinessProfileSchema.parse(input);
+    const restaurant_id = await getRestaurantId();
+
+    if (!restaurant_id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = createServerSupabase();
+
+    const updateData: any = {
+      name: validated.name,
+    };
+
+    if (validated.phone !== undefined) {
+      updateData.phone = validated.phone;
+    }
+
+    if (validated.brand_color !== undefined) {
+      updateData.brand_color = validated.brand_color;
+    }
+
+    const { data, error } = await supabase
+      .from("restaurants")
+      .update(updateData)
+      .eq("id", restaurant_id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Failed to update business profile:", error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard");
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Update business profile error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update profile",
+    };
+  }
+}
+
+/**
+ * Update restaurant branding (colors)
+ */
+export async function updateBranding(
+  input: UpdateBrandingInput
+): Promise<RestaurantActionResult> {
+  try {
+    const validated = UpdateBrandingSchema.parse(input);
+    const restaurant_id = await getRestaurantId();
+
+    if (!restaurant_id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = createServerSupabase();
+
+    const { data, error } = await supabase
+      .from("restaurants")
+      .update({
+        brand_color: validated.brand_color,
+      })
+      .eq("id", restaurant_id)
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Failed to update branding:", error);
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/dashboard/settings");
+    revalidatePath("/dashboard");
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Update branding error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to update branding",
+    };
+  }
+}
+
+/**
+ * Get current restaurant profile
+ */
+export async function getRestaurantProfile(): Promise<RestaurantActionResult> {
+  try {
+    const restaurant_id = await getRestaurantId();
+
+    if (!restaurant_id) {
+      return { success: false, error: "Unauthorized" };
+    }
+
+    const supabase = createServerSupabase();
+
+    const { data, error } = await supabase
+      .from("restaurants")
+      .select("id, name, phone, brand_color, created_at")
+      .eq("id", restaurant_id)
+      .single();
+
+    if (error) {
+      console.error("Failed to get restaurant profile:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error("Get restaurant profile error:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to get profile",
+    };
+  }
+}

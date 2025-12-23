@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -36,6 +37,8 @@ type LoginValues = z.infer<typeof LoginSchema>;
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect") || Route.DASHBOARD;
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(LoginSchema),
@@ -50,6 +53,7 @@ export default function LoginPage() {
     setErrorMsg("");
 
     try {
+      const supabase = createBrowserSupabase();
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
@@ -57,7 +61,7 @@ export default function LoginPage() {
 
       if (error) throw error;
 
-      window.location.href = Route.DASHBOARD;
+      window.location.href = redirectTo;
     } catch (err: any) {
       setErrorMsg(err.message || "Login failed");
     } finally {

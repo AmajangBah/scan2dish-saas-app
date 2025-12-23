@@ -70,6 +70,13 @@ const SignupPage = () => {
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            business_name: values.businessName,
+            phone: values.phone,
+          },
+        },
       });
 
       if (error) throw error;
@@ -89,7 +96,22 @@ const SignupPage = () => {
 
       if (dbError) throw dbError;
 
-      alert("Account created! Check your email for confirmation.");
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        // Email confirmation required
+        alert(
+          "✅ Account created successfully!\n\n" +
+            "📧 Please check your email and click the confirmation link to activate your account.\n\n" +
+            "💡 Tip: Check your spam folder if you don't see it."
+        );
+      } else {
+        // Email confirmation disabled or auto-confirmed
+        alert(
+          "✅ Account created successfully! Redirecting to dashboard..."
+        );
+        window.location.href = Route.DASHBOARD;
+      }
+
       form.reset();
     } catch (err: any) {
       setErrorMsg(err.message || "Signup failed. Try again.");
