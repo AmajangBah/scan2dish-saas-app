@@ -1,0 +1,613 @@
+# Scan2Dish QR Code System
+
+## Overview
+
+The QR code system is the **core entry point** for customers. Each table has a unique QR code that links directly to the restaurant's menu.
+
+---
+
+## How It Works
+
+### 1. Table Creation
+```
+Restaurant owner creates table in dashboard
+    ↓
+Table gets UUID from database (e.g., "abc123-def456-...")
+    ↓
+QR code is auto-generated with URL: 
+    https://yourdomain.com/menu/{tableId}
+    ↓
+Owner downloads/prints QR code
+    ↓
+Places QR code on physical table
+```
+
+### 2. Customer Flow
+```
+Customer scans QR code
+    ↓
+Phone opens URL: /menu/{tableId}
+    ↓
+Server validates table exists & is active
+    ↓
+Server checks if restaurant menu is enabled
+    ↓
+If enabled: Show menu
+If disabled: Show "unavailable" message
+    ↓
+Customer browses menu, adds to cart, orders
+```
+
+### 3. URL Structure
+
+**Customer Menu URL:**
+```
+https://yourdomain.com/menu/{tableId}
+```
+
+**Example:**
+```
+https://scan2dish.com/menu/550e8400-e29b-41d4-a716-446655440000
+```
+
+**What happens at this URL:**
+- Next.js dynamic route: `/app/menu/[tableId]/page.tsx`
+- Redirects to: `/menu/[tableId]/browse`
+- Server validates table ID
+- Checks `restaurant_tables.is_active = true`
+- Checks `restaurants.menu_enabled = true`
+- Fetches menu items for that restaurant
+- Displays menu to customer
+
+---
+
+## Technical Implementation
+
+### Database Schema
+
+**restaurant_tables table:**
+```sql
+id (uuid)              -- This is what goes in the QR code URL
+restaurant_id (uuid)   -- Links to restaurants table
+table_number (text)    -- Display name (e.g., "12")
+is_active (boolean)    -- Must be true for QR to work
+qr_assigned (boolean)  -- Whether QR code exists
+qr_scans (integer)     -- Track how many times scanned
+created_at             -- When table was created
+```
+
+### QR Code Generation (Frontend)
+
+**Library Used:** `qr-code-styling` (installed)
+
+**Location:** `/app/dashboard/tables/components/QrDialog.tsx`
+
+**Code:**
+```typescript
+const qrCode = new QRCodeStyling({
+  width: 300,
+  height: 300,
+  data: `${window.location.origin}/menu/${table.id}`,
+  qrOptions: {
+    errorCorrectionLevel: "H", // High error correction
+  },
+  dotsOptions: {
+    color: "#000000",
+    type: "rounded",
+  },
+  cornersSquareOptions: {
+    color: "#C84501", // Scan2Dish brand color
+    type: "extra-rounded",
+  },
+});
+```
+
+**Features:**
+- Styled with brand colors (orange corners)
+- High error correction (works even if partially damaged)
+- Rounded dots for modern look
+- 300x300px size (good for printing)
+
+### QR Code Dialog
+
+**Trigger:** Owner clicks "View QR" on any table
+
+**What it shows:**
+1. **QR Code Canvas** - Interactive, scannable QR code
+2. **Scan Count** - How many times this QR was scanned
+3. **URL Display** - Full URL with copy button
+4. **Actions:**
+   - Download PNG (for printing)
+   - Copy Link (for sharing digitally)
+   - Preview Menu (test the experience)
+
+---
+
+## Validation & Security
+
+### Server-Side Validation
+
+**When customer scans QR (`/menu/[tableId]/browse`):**
+
+```typescript
+// 1. Validate table exists and is active
+const { data: tableRow } = await supabase
+  .from("restaurant_tables")
+  .select("restaurant_id, restaurants!inner(menu_enabled)")
+  .eq("id", tableId)
+  .single();
+
+// 2. Check if found
+if (!tableRow) {
+  throw new Error("Table not found or inactive");
+}
+
+// 3. Check if restaurant menu is enabled
+if (!tableRow.restaurants.menu_enabled) {
+  throw new Error("Menus currently unavailable");
+}
+```
+
+**Security Measures:**
+1. **UUID Format** - Impossible to guess other table IDs
+2. **Active Check** - Inactive tables return 404
+3. **Menu Enforcement** - Admin can disable menus
+4. **RLS Policies** - Only active tables visible to public
+
+### Admin Enforcement
+
+**If restaurant doesn't pay commission:**
+```
+Admin disables menu (menu_enabled = false)
+    ↓
+Customer scans QR code
+    ↓
+Server checks menu_enabled
+    ↓
+Returns: "Menus currently unavailable. Please contact staff."
+    ↓
+Customer CANNOT see menu or order
+```
+
+---
+
+## QR Code Lifecycle
+
+### Creation
+```
+Table created in dashboard
+    ↓
+Database assigns UUID
+    ↓
+qr_assigned = true (automatic)
+    ↓
+QR code ready to generate in UI
+```
+
+### Usage
+```
+Customer scans QR
+    ↓
+Increments qr_scans counter (future feature)
+    ↓
+Logs visit in analytics (future feature)
+```
+
+### Deactivation
+```
+Admin or owner marks is_active = false
+    ↓
+QR code URL still exists but returns 404
+    ↓
+Customer sees "Table not found"
+```
+
+### Deletion
+```
+Owner deletes table
+    ↓
+Database CASCADE deletes table record
+    ↓
+QR code URL becomes invalid (404)
+    ↓
+Physical QR codes should be destroyed
+```
+
+---
+
+## Physical QR Code Management
+
+### Printing Guidelines
+
+**Recommended Size:**
+- **Minimum:** 2 x 2 inches (50 x 50mm)
+- **Ideal:** 3 x 3 inches (75 x 75mm)
+- **Maximum:** 4 x 4 inches (100 x 100mm)
+
+**File Format:**
+- PNG (generated by UI)
+- High resolution (300x300px minimum)
+- White background
+
+**Materials:**
+1. **Laminated Paper** - Cheap, easy to replace
+2. **Acrylic Stand** - Professional, durable
+3. **Table Tent** - Includes menu description
+4. **Sticker** - Permanent, waterproof
+
+**What to Include:**
+```
+┌─────────────────────┐
+│   [QR CODE HERE]    │
+│                     │
+│  Scan to Order      │
+│  Table 12           │
+│                     │
+│  Scan2Dish          │
+└─────────────────────┘
+```
+
+### Best Practices
+
+**Do:**
+- ✅ Print on white background
+- ✅ Laminate for protection
+- ✅ Place at eye level on table
+- ✅ Keep clean and unobstructed
+- ✅ Test scan before printing batch
+- ✅ Include table number on printout
+
+**Don't:**
+- ❌ Print too small (customers can't scan)
+- ❌ Use colored backgrounds
+- ❌ Fold or crease
+- ❌ Place behind glass (causes glare)
+- ❌ Cover with anything
+- ❌ Reuse QR codes for different tables
+
+---
+
+## Customer Experience
+
+### Scanning Process
+
+**1. Customer sits at table**
+- Sees QR code tent/sticker
+- Opens phone camera
+
+**2. Phone detects QR code**
+- iOS: Camera app automatically
+- Android: Camera app or Google Lens
+- Shows preview: "Open scan2dish.com?"
+
+**3. Customer taps link**
+- Browser opens to `/menu/{tableId}`
+- Loads menu page
+- No app download required
+
+**4. Menu loads**
+- See restaurant name
+- See menu items with prices
+- Can search, filter by category
+- Add items to cart
+
+**5. Checkout**
+- Review cart
+- Add name (optional)
+- Add notes (optional)
+- Place order
+
+**6. Order tracking**
+- Redirected to `/menu/{tableId}/order/{orderId}`
+- See status: Pending → Preparing → Ready
+- Estimated time
+
+### No Authentication Required
+
+**Customers never need to:**
+- Create account
+- Log in
+- Download app
+- Enter personal info (except optional name)
+
+**Benefits:**
+- Zero friction
+- Fast ordering
+- Privacy-friendly
+- Works for everyone
+
+---
+
+## Analytics & Tracking
+
+### Current Tracking
+
+**qr_scans field:**
+- Counter in database
+- Increments each time QR scanned
+- Visible in admin panel and owner dashboard
+
+**Future Enhancements:**
+1. **Scan timestamps** - When was it scanned
+2. **Device info** - iOS vs Android
+3. **Peak hours** - What times get most scans
+4. **Conversion rate** - Scans → Orders
+5. **Geographic data** - Where customers are from
+
+### How to Implement Scan Tracking
+
+**Add to browse page:**
+```typescript
+// app/menu/[tableId]/browse/page.tsx
+
+useEffect(() => {
+  // Track QR scan
+  await supabase.rpc('increment_qr_scan', {
+    table_id_param: tableId
+  });
+}, [tableId]);
+```
+
+**Database function:**
+```sql
+CREATE FUNCTION increment_qr_scan(table_id_param uuid)
+RETURNS void
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE restaurant_tables
+  SET qr_scans = qr_scans + 1
+  WHERE id = table_id_param;
+END;
+$$;
+```
+
+---
+
+## Admin Panel Integration
+
+### View QR Codes
+
+**Admin can:**
+1. Go to `/admin/restaurants/[id]`
+2. See all tables for that restaurant
+3. Click "View QR" on any table
+4. Download QR code
+5. Copy link to send digitally
+
+**Use Cases:**
+- Restaurant forgot to print QR
+- Need to generate QR for new table
+- Want to share menu link online
+- Testing menu before launch
+
+---
+
+## Troubleshooting
+
+### QR Code Not Working
+
+**Customer reports "Table not found":**
+
+1. **Check table exists:**
+   ```sql
+   SELECT * FROM restaurant_tables WHERE id = 'uuid';
+   ```
+
+2. **Check is_active:**
+   ```sql
+   SELECT is_active FROM restaurant_tables WHERE id = 'uuid';
+   ```
+   - If false → Table is deactivated
+
+3. **Check menu_enabled:**
+   ```sql
+   SELECT r.menu_enabled 
+   FROM restaurants r
+   JOIN restaurant_tables t ON t.restaurant_id = r.id
+   WHERE t.id = 'uuid';
+   ```
+   - If false → Admin disabled menu (enforcement)
+
+**Customer reports "Menu unavailable":**
+- Restaurant menu is disabled by admin
+- Check admin panel for enforcement reason
+- Resolve commission issue
+- Re-enable menu
+
+**QR code doesn't scan:**
+- Print quality too low → Reprint at higher resolution
+- QR code damaged → Print new one
+- Background not white → Use white background
+- Size too small → Print larger (3x3 inches minimum)
+
+---
+
+## Alternative Access Methods
+
+### Besides QR Codes
+
+**1. Direct URL Entry:**
+- Customer can type URL manually
+- Good for web orders / takeout
+- Share link via WhatsApp, SMS, etc.
+
+**2. Short URL (Future):**
+- `scan2dish.com/t/ABC123` → Redirects to `/menu/{tableId}`
+- Easier to type
+- Trackable
+
+**3. NFC Tags (Future):**
+- Tap phone to table
+- Same URL as QR code
+- More modern, fewer scan issues
+
+**4. Restaurant Website:**
+- Link to menu from restaurant site
+- Pre-select table or "dine-in"
+- Good for browsing before visit
+
+---
+
+## Best Practices Summary
+
+### For Restaurants
+
+✅ **Print professionally**
+- High quality printer or print shop
+- Laminate for durability
+- Test scan before mass printing
+
+✅ **Strategic placement**
+- Eye level on each table
+- Near entrance (for takeout)
+- On receipts (for future visits)
+
+✅ **Keep updated**
+- If table deleted, remove QR code
+- If table number changes, print new QR
+- Monitor scan counts
+
+✅ **Test regularly**
+- Scan your own QR codes
+- Verify menu loads
+- Check prices are correct
+
+### For Admins
+
+✅ **Monitor enforcement**
+- If menu disabled, QR codes won't work
+- Communicate with restaurant before disabling
+- Re-enable promptly after payment
+
+✅ **Track metrics**
+- Which tables get most scans
+- Conversion rate (scans → orders)
+- Peak times for each restaurant
+
+---
+
+## Technical Details
+
+### QR Code Libraries Installed
+
+```json
+"qrcode": "^1.5.4",           // Node.js QR generation
+"qrcode.react": "^4.2.0",     // React component (alternative)
+"qr-code-styling": "^1.9.2"   // Styled QR codes (currently used)
+```
+
+### Why qr-code-styling?
+
+**Advantages:**
+- Beautiful customizable design
+- Brand color integration
+- Logo support (can add restaurant logo)
+- Multiple export formats (PNG, SVG)
+- High error correction
+- Client-side generation (no server load)
+
+**vs qrcode.react:**
+- qrcode.react is simpler but less customizable
+- qr-code-styling looks more professional
+- Better for branded QR codes
+
+---
+
+## Future Enhancements
+
+### Potential Features
+
+1. **Dynamic QR Codes**
+   - Change destination without reprinting
+   - Track campaign performance
+   - A/B test different menus
+
+2. **Custom Branding**
+   - Add restaurant logo to center
+   - Match restaurant's brand colors
+   - Custom frames/borders
+
+3. **Multi-Language**
+   - QR code parameter for language
+   - `/menu/{tableId}?lang=es`
+   - Detect phone language
+
+4. **Time-Based Menus**
+   - Breakfast menu 7am-11am
+   - Lunch menu 11am-3pm
+   - Dinner menu 3pm-close
+   - Same QR code, different menu
+
+5. **Table Sections**
+   - Group tables by area (patio, indoor, bar)
+   - Different QR code styling per section
+   - Better analytics
+
+6. **Pre-Order**
+   - Customer scans before arriving
+   - Order is ready when they sit down
+   - Reduces wait time
+
+---
+
+## Security Considerations
+
+### QR Code Hijacking Prevention
+
+**Threat:** Someone prints fake QR codes with their own URL
+
+**Mitigation:**
+1. **Watermark** - Add restaurant logo to QR code
+2. **Regular inspection** - Staff checks QR codes daily
+3. **Unique design** - Custom brand colors hard to replicate
+4. **Holographic stickers** - Tamper-evident materials
+5. **Customer education** - Show what real QR looks like
+
+### URL Structure Security
+
+**Why UUIDs are safe:**
+- 128-bit identifier = 2^128 possible values
+- Impossible to guess other table IDs
+- Even if someone tries random UUIDs, RLS blocks unauthorized access
+
+**Additional protection:**
+- RLS policies prevent data leakage
+- Only active tables are accessible
+- Admin enforcement blocks compromised restaurants
+
+---
+
+## Summary
+
+**QR Code Flow:**
+```
+Physical QR on table → Customer scans → Opens URL
+   ↓
+Server validates table exists & is active
+   ↓
+Server checks menu_enabled (enforcement)
+   ↓
+If valid → Show menu → Customer orders
+If invalid → Show error message
+```
+
+**Key Points:**
+- Each table has unique UUID
+- QR code encodes: `https://domain.com/menu/{uuid}`
+- Server-side validation prevents bypassing
+- Admin can disable menus (enforcement)
+- No customer authentication required
+- Trackable (qr_scans counter)
+- Downloadable from dashboard
+- Styled with brand colors
+
+**The QR code is the primary customer entry point for Scan2Dish.**
+
+---
+
+**Status:** ✅ Fully Implemented  
+**Libraries:** qr-code-styling, qrcode, qrcode.react  
+**UI:** QrDialog component with download/preview  
+**Security:** UUID + RLS + Enforcement  
+**Documentation:** Complete  
