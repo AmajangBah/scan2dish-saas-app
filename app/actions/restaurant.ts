@@ -53,7 +53,12 @@ export async function updateBusinessProfile(
 
     const supabase = createServerSupabase();
 
-    const updateData: any = {
+    const updateData: {
+      name: string;
+      phone?: string | null;
+      brand_color?: string;
+      currency?: string;
+    } = {
       name: validated.name,
     };
 

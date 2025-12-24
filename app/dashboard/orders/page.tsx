@@ -46,10 +46,10 @@ export default async function OrdersPage() {
   // Map database orders to UI Order type
   const mappedOrders: Order[] = (orders || []).map((o) => {
     const items = Array.isArray(o.items) ? o.items : [];
-    const orderItems = items.map((item: any) => ({
+    const orderItems = items.map((item: {name?: string; quantity?: number; price?: string | number}) => ({
       name: item.name || "Unknown Item",
       qty: item.quantity || 1,
-      price: parseFloat(item.price) || 0,
+      price: parseFloat(String(item.price || 0)),
     }));
 
     return {

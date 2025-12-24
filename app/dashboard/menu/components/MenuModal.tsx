@@ -116,7 +116,7 @@ export default function MenuModal({
   // DRAG TO REORDER
   // --------------------------------------------
 
-  const onDragEnd = (result: any) => {
+  const onDragEnd = (result: {destination?: {index: number} | null; source: {index: number}}) => {
     if (!result.destination) return;
 
     const reordered = [...images];

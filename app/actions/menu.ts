@@ -96,7 +96,7 @@ export async function updateMenuItem(
     const supabase = createServerSupabase();
 
     // Build update object with only provided fields
-    const updateData: any = {};
+    const updateData: Partial<typeof validated> = {};
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;
     if (input.price !== undefined) updateData.price = input.price;

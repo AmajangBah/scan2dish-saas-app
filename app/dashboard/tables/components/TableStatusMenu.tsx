@@ -17,7 +17,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
-import { Table } from "../helpers";
+import { Table } from "../types";
 
 export default function TableStatusMenu({
   table,

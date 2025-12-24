@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import CartItem from "../../components/CartItem";
 import { useCart } from "../../context/CartContext";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default function CartPage() {
   const { tableId } = useParams();
@@ -81,17 +82,17 @@ export default function CartPage() {
         <div className="mt-6 bg-white p-4 rounded-2xl shadow-sm">
           <div className="flex justify-between py-2">
             <div className="text-lg font-medium">Subtotal</div>
-            <div className="font-semibold">D{subtotal}</div>
+            <div className="font-semibold">{formatPrice(subtotal, "GMD")}</div>
           </div>
 
           <div className="flex justify-between py-2">
             <div className="text-sm text-gray-600">VAT</div>
-            <div className="font-medium">D{VAT}</div>
+            <div className="font-medium">{formatPrice(VAT, "GMD")}</div>
           </div>
 
           <div className="flex justify-between py-2">
             <div className="text-sm text-gray-600">Tip fee</div>
-            <div className="font-medium">D{tip}</div>
+            <div className="font-medium">{formatPrice(tip, "GMD")}</div>
           </div>
 
           <hr className="my-3" />
@@ -99,7 +100,7 @@ export default function CartPage() {
           <div className="flex justify-between items-center">
             <div>
               <div className="text-lg font-semibold">Total</div>
-              <div className="text-sm text-gray-500">D{total}</div>
+              <div className="text-sm text-gray-500">{formatPrice(total, "GMD")}</div>
             </div>
 
             <div className="flex flex-col items-end">

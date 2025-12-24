@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default async function OrderTracker({
   params,
@@ -64,7 +65,7 @@ export default async function OrderTracker({
 
   // Get items summary
   const items = Array.isArray(order.items) ? order.items : [];
-  const itemCount = items.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+  const itemCount = items.reduce((sum: number, item: {quantity?: number}) => sum + (item.quantity || 1), 0);
 
   return (
     <div className="min-h-screen pb-28 px-4 pt-6">
@@ -132,20 +133,20 @@ export default async function OrderTracker({
           <div className="border-t pt-4 mb-4">
             <p className="text-sm font-semibold text-gray-700 mb-2">Your Order:</p>
             <div className="space-y-1">
-              {items.map((item: any, index: number) => (
+              {items.map((item: {name?: string; quantity?: number; price?: number}, index: number) => (
                 <div key={index} className="flex justify-between text-sm">
                   <span className="text-gray-600">
                     {item.quantity}x {item.name}
                   </span>
                   <span className="text-gray-800">
-                    D{(parseFloat(item.price) * item.quantity).toFixed(2)}
+                    {formatPrice((parseFloat(String(item.price || 0)) * (item.quantity || 1)), "GMD")}
                   </span>
                 </div>
               ))}
             </div>
             <div className="flex justify-between text-sm font-bold mt-2 pt-2 border-t">
               <span>Total</span>
-              <span>D{parseFloat(order.total).toFixed(2)}</span>
+              <span>{formatPrice(parseFloat(order.total), "GMD")}</span>
             </div>
           </div>
 

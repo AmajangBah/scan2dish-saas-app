@@ -89,7 +89,7 @@ const NavBar = () => {
             </Button>
 
             <Button
-              onClick={() => router.push(Route.SIGNUPAGE)}
+              onClick={() => router.push(Route.SIGNUPPAGE)}
               className="bg-white text-[#D35A0F] px-5 py-2 hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-md"
             >
               Sign Up Free
@@ -142,7 +142,7 @@ const NavBar = () => {
 
               <Button
                 onClick={() => {
-                  router.push(Route.SIGNUPAGE);
+                  router.push(Route.SIGNUPPAGE);
                   setMobileMenuOpen(false);
                 }}
                 className="w-full bg-white text-[#D35A0F] hover:bg-gray-100 transition-colors"

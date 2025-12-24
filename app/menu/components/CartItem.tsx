@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useCart } from "../context/CartContext";
 import QuantitySelector from "./QuantitySelector";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default function CartItem({
   item,
@@ -18,7 +19,7 @@ export default function CartItem({
         <div className="flex justify-between items-start">
           <div>
             <h4 className="font-medium">{item.name}</h4>
-            <p className="text-sm text-gray-500">D{item.price}</p>
+            <p className="text-sm text-gray-500">{formatPrice(item.price, "GMD")}</p>
           </div>
 
           <div className="text-right">

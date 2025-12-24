@@ -82,10 +82,10 @@ export default async function Dashboard() {
           hour: "numeric",
           minute: "2-digit",
         }),
-        items: items.map((item: any) => ({
+        items: items.map((item: {name?: string; quantity?: number; price?: string | number}) => ({
           name: item.name || "Unknown",
           quantity: item.quantity || 1,
-          price: parseFloat(item.price) || 0,
+          price: parseFloat(String(item.price || 0)),
         })),
       };
     }) || [];

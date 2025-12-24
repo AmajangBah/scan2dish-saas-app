@@ -5,7 +5,7 @@ const Route = {
   FEATURES: "#features",
 
   LOGINPAGE: "/login",
-  SIGNUPAGE: "/register",
+  SIGNUPPAGE: "/register",
 
   // DASHBOARD ROUTES (REAL URLs)
   DASHBOARD: "/dashboard",

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { MenuItem, MenuCategory } from "./types";
 import CategoryTabs from "./components/CategoryTabs";
-import SearchBar from "./components/SearchBar";
+import SearchBar from "@/components/ui/search-bar";
 import AddMenuButton from "./components/AddMenuButton";
 import MenuCard from "./components/MenuCard";
 import MenuModal from "./components/MenuModal";
@@ -211,7 +211,12 @@ export default function MenuClient({
         }
       />
 
-      <SearchBar value={search} onChange={setSearch} />
+      <SearchBar 
+        value={search} 
+        onChange={setSearch} 
+        placeholder="Search menu items..."
+        className="max-w-md mx-auto"
+      />
 
       {/* 🔥 SWITCH BETWEEN GRID AND LIST */}
       {view === "grid" ? (

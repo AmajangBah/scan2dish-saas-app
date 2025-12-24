@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { QrCode, Download, Share2, Eye } from "lucide-react";
-import { Table } from "../helpers";
+import { Table } from "../types";
 
 export default function QrDialog({
   open,

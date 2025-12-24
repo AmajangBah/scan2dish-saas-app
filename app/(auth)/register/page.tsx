@@ -114,7 +114,7 @@ const SignupPage = () => {
       }
 
       form.reset();
-    } catch (err: any) {
+    } catch (err) {
       setErrorMsg(err.message || "Signup failed. Try again.");
     } finally {
       setLoading(false);

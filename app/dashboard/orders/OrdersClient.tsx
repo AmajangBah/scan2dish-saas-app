@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import SearchBar from "./components/SearchBar";
+import SearchBar from "@/components/ui/search-bar";
 import Pagination from "./components/Pagination";
 import OrderCard from "./components/OrderCard";
 import OrderDetailsModal from "./components/OrderDetailsModal";
@@ -69,7 +69,11 @@ export default function OrdersClient({
       <h1 className="text-3xl font-bold text-gray-800 text-center">Orders</h1>
 
       <div className="max-w-md mx-auto space-y-2">
-        <SearchBar value={search} onChange={setSearch} />
+        <SearchBar 
+          value={search} 
+          onChange={setSearch} 
+          placeholder="Search by table..."
+        />
         {error && <div className="text-sm text-red-600 text-center">{error}</div>}
         {savingOrderId && (
           <div className="text-xs text-gray-500 text-center">

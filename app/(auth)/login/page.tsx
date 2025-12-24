@@ -62,7 +62,7 @@ export default function LoginPage() {
       if (error) throw error;
 
       window.location.href = redirectTo;
-    } catch (err: any) {
+    } catch (err) {
       setErrorMsg(err.message || "Login failed");
     } finally {
       setLoading(false);
@@ -146,7 +146,7 @@ export default function LoginPage() {
 
       <p className="text-center text-gray-600 mt-4">
         Don't have an account?{" "}
-        <Link href={Route.SIGNUPAGE} className="text-[#C84501] font-medium">
+        <Link href={Route.SIGNUPPAGE} className="text-[#C84501] font-medium">
           Sign up
         </Link>
       </p>
