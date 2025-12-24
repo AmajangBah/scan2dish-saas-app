@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardHeader,
@@ -14,6 +16,7 @@ interface PriceCardProps {
   buttonText: string;
   buttonColor?: string;
   starImageUrl?: string;
+  onButtonClick?: () => void;
 }
 
 const PriceCard = ({
@@ -24,9 +27,10 @@ const PriceCard = ({
   buttonText,
   buttonColor = "#D65A00",
   starImageUrl,
+  onButtonClick,
 }: PriceCardProps) => {
   return (
-    <Card className="relative w-full max-w-[650px] rounded-3xl border-3 border-[#e35300] p-10 shadow-lg bg-white">
+    <Card className="relative w-full max-w-[650px] rounded-3xl border-3 border-[#e35300] p-10 shadow-lg bg-white hover:shadow-2xl transition-all duration-300 hover:scale-105">
       {/* Star Icon (top-right) */}
       {starImageUrl && (
         <img
@@ -52,7 +56,8 @@ const PriceCard = ({
 
       <CardFooter className="mt-8">
         <Button
-          className="w-full text-white py-6 rounded-xl text-lg"
+          onClick={onButtonClick}
+          className="w-full text-white py-6 rounded-xl text-lg hover:opacity-90 transition-all duration-300 hover:scale-105"
           style={{ backgroundColor: buttonColor }}
         >
           {buttonText}

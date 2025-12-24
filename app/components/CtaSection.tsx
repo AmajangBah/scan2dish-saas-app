@@ -1,8 +1,17 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import React from "react";
+import { useRouter } from "next/navigation";
+import Route from "../constants/Route";
 
 const CtaSection = () => {
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.push(Route.SIGNUPAGE);
+  };
+
   return (
     <section className="relative min-h-screen bg-white pt-10 flex flex-col items-center justify-center px-4 md:px-0">
       {/* Heading + Description */}
@@ -16,7 +25,10 @@ const CtaSection = () => {
           and sales — all from one easy-to-use dashboard.
         </p>
 
-        <Button className="bg-[#D35A0F] rounded-md py-4 px-8 sm:py-6 sm:px-12 my-10 sm:my-20">
+        <Button 
+          onClick={handleGetStarted}
+          className="bg-[#D35A0F] hover:bg-[#B14A08] hover:scale-105 transition-all duration-300 rounded-md py-4 px-8 sm:py-6 sm:px-12 my-10 sm:my-20"
+        >
           Get Started Today
         </Button>
 
@@ -26,7 +38,7 @@ const CtaSection = () => {
           alt="Star"
           width={56}
           height={56}
-          className="absolute top-6 right-6 w-10 sm:w-14"
+          className="absolute top-6 right-6 w-10 sm:w-14 animate-spin-slow"
         />
       </div>
     </section>

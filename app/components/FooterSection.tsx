@@ -14,19 +14,19 @@ const footerSections = [
   {
     title: "Product",
     links: [
-      { name: "Overview", href: "/overview" },
-      { name: "Pricing", href: "/pricing" },
-      { name: "How it Works", href: "/how-it-works" },
-      { name: "Features", href: "/features" },
+      { name: "Features", href: "#features" },
+      { name: "Pricing", href: "#pricing" },
+      { name: "How it Works", href: "#features" },
+      { name: "FAQ", href: "#faq" },
     ],
   },
   {
-    title: "Company",
+    title: "Get Started",
     links: [
-      { name: "About Us", href: "/about" },
-      { name: "Careers", href: "/careers" },
-      { name: "Contact", href: "/contact" },
-      { name: "Blog", href: "/blog" },
+      { name: "Sign Up", href: "/register" },
+      { name: "Login", href: "/login" },
+      { name: "Dashboard", href: "/dashboard" },
+      { name: "Admin", href: "/admin" },
     ],
   },
 ];
@@ -102,19 +102,19 @@ const FooterSection = () => {
 
           {/* Socials */}
           <div className="flex items-center gap-4 mt-6 text-white/80">
-            <Link href="#" className="hover:text-white">
+            <Link href="https://instagram.com/scan2dish" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               <InstagramIcon size={20} />
             </Link>
 
-            <Link href="#" className="hover:text-white">
+            <Link href="https://facebook.com/scan2dish" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               <FacebookIcon size={20} />
             </Link>
 
-            <Link href="#" className="hover:text-white">
+            <Link href="https://twitter.com/scan2dish" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               <TwitterIcon size={20} />
             </Link>
 
-            <Link href="#" className="hover:text-white">
+            <Link href="https://tiktok.com/@scan2dish" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
               <Image src="/tiktok.png" alt="TikTok" width={20} height={20} />
             </Link>
           </div>
