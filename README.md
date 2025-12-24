@@ -21,7 +21,7 @@ A modern, fast, and user-friendly platform that enables restaurants to offer con
 
 ### 🆕 New Features
 - 🌍 **Multi-Language Support** - English, French, Spanish (400+ translated strings)
-- 💰 **Multi-Currency Support** - 9 currencies: USD, EUR, GBP, GMD, XOF, NGN, GHS, ZAR, KES
+- 💰 **Multi-Currency Support** - 9 currencies including USD, EUR, GBP, and African currencies
 - 🎓 **Onboarding Wizard** - 7-step guided setup for new restaurant owners
 - 💵 **Commission Transparency** - Clear 5% commission explanation with examples
 

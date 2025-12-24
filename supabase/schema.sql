@@ -63,7 +63,7 @@ create table if not exists public.restaurants (
   name text not null,
   phone text,
   brand_color text not null default '#C84501',
-  currency text not null default 'GMD',
+  currency text not null default 'USD',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint restaurants_currency_check check (currency in ('USD', 'EUR', 'GBP', 'GMD', 'XOF', 'NGN', 'GHS', 'ZAR', 'KES'))

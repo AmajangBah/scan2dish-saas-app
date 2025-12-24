@@ -12,6 +12,6 @@ interface PriceProps {
  * Price component that formats prices with the correct currency symbol
  * Usage: <Price amount={100} currency="USD" />
  */
-export default function Price({ amount, currency = "GMD", className = "" }: PriceProps) {
+export default function Price({ amount, currency = "USD", className = "" }: PriceProps) {
   return <span className={className}>{formatPrice(amount, currency)}</span>;
 }

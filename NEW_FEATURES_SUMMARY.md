@@ -26,14 +26,14 @@
 ### Features Added:
 1. ✅ **9 Currencies Supported**
    - USD ($), EUR (€), GBP (£)
-   - GMD (D) - Default for Gambia
+   - GMD (D)
    - XOF (CFA), NGN (₦), GHS (₵)
    - ZAR (R), KES (KSh)
 
 2. ✅ **Currency Configuration**
    - Restaurant owners choose currency in settings
    - Currency stored in database per restaurant
-   - Default: GMD (Gambian Dalasi)
+   - Default: USD (US Dollar)
 
 3. ✅ **Smart Price Formatting**
    - Symbol prefix for USD, EUR, GBP, ZAR
@@ -340,11 +340,11 @@ CREATE TABLE onboarding_progress (
 ```typescript
 // Currency utility
 formatPrice(100, "USD") → "$100.00"
-formatPrice(100, "GMD") → "D100"
+formatPrice(100, "USD") → "$100.00"
 formatPrice(100, "EUR") → "€100.00"
 
 // Currency hook
-const { currency } = useCurrency(); // "GMD"
+const { currency } = useCurrency(); // "USD"
 
 // Price component
 <Price amount={100} currency="USD" /> → "$100.00"

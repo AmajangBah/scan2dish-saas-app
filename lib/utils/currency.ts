@@ -16,7 +16,7 @@ export const CURRENCIES: Record<string, Currency> = {
   USD: { code: "USD", symbol: "$", name: "US Dollar", locale: "en-US" },
   EUR: { code: "EUR", symbol: "€", name: "Euro", locale: "fr-FR" },
   GBP: { code: "GBP", symbol: "£", name: "British Pound", locale: "en-GB" },
-  GMD: { code: "GMD", symbol: "D", name: "Gambian Dalasi", locale: "en-GM" },
+  GMD: { code: "GMD", symbol: "D", name: "GMD", locale: "en-GM" },
   XOF: { code: "XOF", symbol: "CFA", name: "West African CFA", locale: "fr-FR" },
   NGN: { code: "NGN", symbol: "₦", name: "Nigerian Naira", locale: "en-NG" },
   GHS: { code: "GHS", symbol: "₵", name: "Ghanaian Cedi", locale: "en-GH" },
@@ -25,9 +25,9 @@ export const CURRENCIES: Record<string, Currency> = {
 };
 
 /**
- * Default currency (Gambian Dalasi for Scan2Dish)
+ * Default currency (USD for international compatibility)
  */
-export const DEFAULT_CURRENCY = "GMD";
+export const DEFAULT_CURRENCY = "USD";
 
 /**
  * Get currency by code
