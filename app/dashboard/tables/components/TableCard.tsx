@@ -11,8 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, QrCode } from "lucide-react";
 
-import { Table } from "../types";
-import { getStatusColor } from "../utils/getStatusColor";
+import { Table, getStatusColor } from "../types";
 import TableStatusMenu from "./TableStatusMenu";
 
 export default function TableCard({

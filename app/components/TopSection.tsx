@@ -9,7 +9,7 @@ const TopSection = () => {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.push(Route.SIGNUPAGE);
+    router.push(Route.SIGNUPPAGE);
   };
 
   const handleSeeHowItWorks = () => {
