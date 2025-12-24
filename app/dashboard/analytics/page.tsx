@@ -20,6 +20,11 @@ export default async function AnalyticsPage() {
     );
   }
 
+  // Fetch restaurant currency
+  const { getRestaurantProfile } = await import("@/app/actions/restaurant");
+  const profileResult = await getRestaurantProfile();
+  const currency = profileResult.success && profileResult.data ? profileResult.data.currency : "GMD";
+
   // Fetch all analytics data in parallel
   const [kpis, topItems, categorySales, weeklySales] = await Promise.all([
     getAnalyticsKPIs(),
@@ -34,6 +39,7 @@ export default async function AnalyticsPage() {
       topItems={topItems}
       categorySales={categorySales}
       weeklySales={weeklySales}
+      currency={currency}
     />
   );
 }

@@ -62,7 +62,7 @@ export default function LoginPage() {
       if (error) throw error;
 
       window.location.href = redirectTo;
-    } catch (err: any) {
+    } catch (err) {
       setErrorMsg(err.message || "Login failed");
     } finally {
       setLoading(false);

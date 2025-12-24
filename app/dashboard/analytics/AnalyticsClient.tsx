@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { formatPrice } from "@/lib/utils/currency";
 import type {
   AnalyticsKPIs,
   TopSellingItem,
@@ -13,6 +14,7 @@ interface AnalyticsClientProps {
   topItems: TopSellingItem[];
   categorySales: CategorySales[];
   weeklySales: WeeklySalesData[];
+  currency: string;
 }
 
 export default function AnalyticsClient({
@@ -20,6 +22,7 @@ export default function AnalyticsClient({
   topItems,
   categorySales,
   weeklySales,
+  currency,
 }: AnalyticsClientProps) {
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [selectedRange, setSelectedRange] = useState<any>(null);
@@ -75,7 +78,7 @@ export default function AnalyticsClient({
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="text-sm text-gray-600 mb-1">Total Revenue</div>
-          <div className="text-3xl font-bold">D{kpis.totalRevenue}</div>
+          <div className="text-3xl font-bold">{formatPrice(kpis.totalRevenue, currency)}</div>
           <div className="text-xs text-green-600 mt-2">
             {kpis.completedOrders} completed orders
           </div>
@@ -83,7 +86,7 @@ export default function AnalyticsClient({
 
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="text-sm text-gray-600 mb-1">Avg Order Value</div>
-          <div className="text-3xl font-bold">D{kpis.avgOrderValue}</div>
+          <div className="text-3xl font-bold">{formatPrice(kpis.avgOrderValue, currency)}</div>
           <div className="text-xs text-gray-500 mt-2">Per completed order</div>
         </div>
 
@@ -112,7 +115,7 @@ export default function AnalyticsClient({
 
               return (
                 <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <div className="text-xs font-medium">D{day.sales}</div>
+                  <div className="text-xs font-medium">{formatPrice(day.sales, currency)}</div>
                   <div
                     className="w-full bg-[#C84501] rounded-t-lg transition-all hover:opacity-80"
                     style={{ height: `${heightPercent}%`, minHeight: "4px" }}
@@ -141,7 +144,7 @@ export default function AnalyticsClient({
                   <div className="flex justify-between mb-2">
                     <span className="font-medium">{cat.category}</span>
                     <span className="text-gray-600">
-                      D{cat.value} ({Math.round(percent)}%)
+                      {formatPrice(cat.value, currency)} ({Math.round(percent)}%)
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
@@ -183,7 +186,7 @@ export default function AnalyticsClient({
                     </td>
                     <td className="py-3 text-right">{item.quantity}</td>
                     <td className="py-3 text-right font-semibold">
-                      D{Math.round(item.revenue)}
+                      {formatPrice(Math.round(item.revenue), currency)}
                     </td>
                   </tr>
                 ))}

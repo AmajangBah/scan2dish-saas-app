@@ -10,7 +10,7 @@ interface DashboardLayoutProps {
 }
 
 // You can use a function to generate metadata dynamically
-export async function generateMetadata({ params }: { params: any }) {
+export async function generateMetadata() {
   const pathname = params?.pathname || "dashboard";
   return generateMetadataFromPath(pathname);
 }
