@@ -92,7 +92,7 @@ export default function CheckoutPage() {
           <div className="flex justify-between items-center">
             <div>
               <div className="text-sm text-gray-600">Total</div>
-              <div className="text-xl font-semibold">D{subtotal}</div>
+              <div className="text-xl font-semibold">{formatPrice(subtotal, "GMD")}</div>
             </div>
 
             {error && (

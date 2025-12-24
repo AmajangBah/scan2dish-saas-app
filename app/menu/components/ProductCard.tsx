@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useCart } from "../context/CartContext";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default function ProductCard({
   product,
@@ -26,7 +27,7 @@ export default function ProductCard({
           <p className="text-sm text-gray-500 mt-1">{product.desc}</p>
         )}
         <div className="mt-3 flex items-center justify-between">
-          <div className="text-lg font-bold">D{product.price}</div>
+          <div className="text-lg font-bold">{formatPrice(product.price, "GMD")}</div>
           <Button
             variant="outline"
             onClick={() =>

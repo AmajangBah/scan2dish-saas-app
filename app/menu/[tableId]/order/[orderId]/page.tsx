@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default async function OrderTracker({
   params,
@@ -138,14 +139,14 @@ export default async function OrderTracker({
                     {item.quantity}x {item.name}
                   </span>
                   <span className="text-gray-800">
-                    D{(parseFloat(item.price) * item.quantity).toFixed(2)}
+                    {formatPrice((parseFloat(String(item.price || 0)) * (item.quantity || 1)), "GMD")}
                   </span>
                 </div>
               ))}
             </div>
             <div className="flex justify-between text-sm font-bold mt-2 pt-2 border-t">
               <span>Total</span>
-              <span>D{parseFloat(order.total).toFixed(2)}</span>
+              <span>{formatPrice(parseFloat(order.total), "GMD")}</span>
             </div>
           </div>
 
