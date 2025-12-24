@@ -58,6 +58,28 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Protect admin routes
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      const loginUrl = new URL("/login", request.url);
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Check if user is admin
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("id, is_active")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .single();
+
+    if (!adminUser) {
+      // Not an admin - redirect to regular dashboard
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith("/dashboard")) {
     if (!user) {
@@ -74,6 +96,18 @@ export async function middleware(request: NextRequest) {
       request.nextUrl.pathname === "/register") &&
     user
   ) {
+    // Check if admin
+    const { data: adminUser } = await supabase
+      .from("admin_users")
+      .select("id, is_active")
+      .eq("user_id", user.id)
+      .eq("is_active", true)
+      .single();
+
+    if (adminUser) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
