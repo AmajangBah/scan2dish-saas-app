@@ -1,6 +1,16 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import PriceCard from "./PriceCard";
+import Route from "../constants/Route";
 
 const PricingSection = () => {
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.push(Route.SIGNUPAGE);
+  };
+
   return (
     <section className="relative min-h-screen bg-white pt-5 my-6 flex flex-col items-center justify-center px-4 md:px-0">
       {/* Heading + Description */}
@@ -25,6 +35,7 @@ const PricingSection = () => {
           buttonText="Get started today"
           buttonColor="#D65A00"
           starImageUrl="/star.svg"
+          onButtonClick={handleGetStarted}
         />
       </div>
     </section>

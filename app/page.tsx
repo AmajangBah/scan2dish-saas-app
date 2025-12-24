@@ -12,25 +12,49 @@ import TopSection from "./components/TopSection";
 
 const Home = () => {
   return (
-    <main>
+    <main className="scroll-smooth">
       <NavBar />
       {/* Hero Section */}
       <header className="min-h-screen bg-[#D35A0F] px-6">
         <TopSection />
       </header>
 
-      {/* Second Section */}
-      <section>
+      {/* Features Section */}
+      <section id="features">
         <SecondSection />
         <ThirdSection />
         <FourthSection />
-        <TestimonialSection />
-        <PricingSection />
-        <ProductDisplay />
-        <CtaSection />
-        <FAQSection />
-        <FooterSection />
       </section>
+
+      {/* Social Proof */}
+      <section>
+        <TestimonialSection />
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing">
+        <PricingSection />
+      </section>
+
+      {/* Product Display */}
+      <section>
+        <ProductDisplay />
+      </section>
+
+      {/* CTA Section */}
+      <section>
+        <CtaSection />
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq">
+        <FAQSection />
+      </section>
+
+      {/* Footer */}
+      <footer>
+        <FooterSection />
+      </footer>
     </main>
   );
 };
