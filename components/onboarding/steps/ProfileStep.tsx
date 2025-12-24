@@ -19,7 +19,7 @@ export default function ProfileStep({ onNext, onBack }: ProfileStepProps) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    currency: "GMD",
+    currency: "USD",
     brandColor: "#C84501",
   });
 

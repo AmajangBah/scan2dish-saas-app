@@ -12,9 +12,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { getCurrencyOptions } from "@/lib/utils/currency";
 
 export default function PreferencesSection() {
   const [color, setColor] = useState("#ff9800");
+  const currencyOptions = getCurrencyOptions();
 
   return (
     <div className="p-6 space-y-10 max-w-md">
@@ -30,26 +32,24 @@ export default function PreferencesSection() {
           <SelectContent>
             <SelectItem value="en">English</SelectItem>
             <SelectItem value="fr">French</SelectItem>
-            <SelectItem value="ar">Arabic</SelectItem>
+            <SelectItem value="es">Spanish</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {/* Currency (West African) */}
+      {/* Currency */}
       <div className="space-y-2">
         <Label>Currency</Label>
-        <Select defaultValue="gmd">
+        <Select defaultValue="usd">
           <SelectTrigger>
             <SelectValue placeholder="Select currency" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="gmd">GMD (Dalasi - Gambia)</SelectItem>
-            <SelectItem value="ngn">NGN (Naira - Nigeria)</SelectItem>
-            <SelectItem value="ghs">GHS (Cedi - Ghana)</SelectItem>
-            <SelectItem value="xof">
-              XOF (CFA Franc - Senegal/West Africa)
-            </SelectItem>
-            <SelectItem value="sll">SLL (Leone - Sierra Leone)</SelectItem>
+            {currencyOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value.toLowerCase()}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

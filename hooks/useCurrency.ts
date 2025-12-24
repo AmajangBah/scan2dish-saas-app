@@ -8,7 +8,7 @@ import { getRestaurantProfile } from "@/app/actions/restaurant";
  * Returns the currency code and a loading state
  */
 export function useCurrency() {
-  const [currency, setCurrency] = useState<string>("GMD");
+  const [currency, setCurrency] = useState<string>("USD");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export function useCurrency() {
       try {
         const result = await getRestaurantProfile();
         if (result.success && result.data) {
-          setCurrency(result.data.currency || "GMD");
+          setCurrency(result.data.currency || "USD");
         }
       } catch (error) {
         console.error("Failed to load currency:", error);

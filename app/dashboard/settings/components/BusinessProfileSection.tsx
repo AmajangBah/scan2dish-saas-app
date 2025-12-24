@@ -24,7 +24,7 @@ export default function BusinessProfile() {
     website: "",
     address: "",
     description: "",
-    currency: "GMD",
+    currency: "USD",
   });
 
   const currencyOptions = getCurrencyOptions();
@@ -39,7 +39,7 @@ export default function BusinessProfile() {
           ...prev,
           name: result.data.name || "",
           phone: result.data.phone || "",
-          currency: result.data.currency || "GMD",
+          currency: result.data.currency || "USD",
         }));
       }
       setLoading(false);

@@ -4,7 +4,7 @@
 
 -- Add currency column to restaurants table
 ALTER TABLE public.restaurants 
-ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'GMD';
+ADD COLUMN IF NOT EXISTS currency text NOT NULL DEFAULT 'USD';
 
 -- Add comment
 COMMENT ON COLUMN public.restaurants.currency IS 'Restaurant currency code (USD, EUR, GBP, GMD, etc.)';
