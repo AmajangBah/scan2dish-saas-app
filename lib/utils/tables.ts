@@ -5,7 +5,7 @@ import { createServerSupabase } from "@/lib/supabase/server";
  * Returns the table data if valid, null otherwise
  */
 export async function validateTable(tableId: string) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const { data: table, error } = await supabase
     .from("restaurant_tables")

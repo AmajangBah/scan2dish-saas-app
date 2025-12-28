@@ -1,33 +1,25 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import RestaurantNavBar from "../components/RestaurantNavBar";
 import React, { ReactNode } from "react";
 import { generateMetadataFromPath } from "@/utils/generateMetadata";
-
-interface DashboardLayoutProps {
-  children: ReactNode;
-  params: { pathname?: string }; // App Router passes params
-}
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
 
 // You can use a function to generate metadata dynamically
 export async function generateMetadata() {
-  const pathname = params?.pathname || "dashboard";
-  return generateMetadataFromPath(pathname);
+  return generateMetadataFromPath("dashboard");
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  return (
-    <div className="flex flex-row">
-      <div className="flex min-h-screen bg-[#F9F9F9]">
-        <SidebarProvider>
-          <RestaurantSidebar />
-        </SidebarProvider>
-      </div>
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const ctx = await requireRestaurantPage();
 
-      <div className="flex flex-col flex-1 min-w-0 bg-[#F5F5F5]">
-        <RestaurantNavBar />
+  return (
+    <SidebarProvider>
+      <RestaurantSidebar restaurantName={ctx.restaurant.name} />
+      <SidebarInset className="min-w-0 bg-[#F5F5F5]">
+        <RestaurantNavBar restaurantName={ctx.restaurant.name} />
         <main className="p-6">{children}</main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

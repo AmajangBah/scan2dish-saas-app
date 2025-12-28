@@ -1,7 +1,6 @@
 "use client";
 
 import { CartProvider } from "./context/CartContext";
-import TopHeader from "./components/TopHeader";
 
 export default function MenuLayout({
   children,
@@ -12,7 +11,6 @@ export default function MenuLayout({
   return (
     <CartProvider>
       <div className="min-h-screen bg-white">
-        <TopHeader />
         <main>{children}</main>
       </div>
     </CartProvider>

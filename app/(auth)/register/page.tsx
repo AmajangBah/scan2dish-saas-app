@@ -48,8 +48,6 @@ const SignupPage = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const supabase = createBrowserSupabase();
-
   const form = useForm<SignupValues>({
     resolver: zodResolver(SignupFormSchema),
     defaultValues: {
@@ -66,12 +64,14 @@ const SignupPage = () => {
     setErrorMsg("");
 
     try {
+      const supabase = createBrowserSupabase();
       // 1️⃣ Sign up user
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          // After email confirmation, route into onboarding (dashboard is blocked until completion).
+          emailRedirectTo: `${window.location.origin}/onboarding`,
           data: {
             business_name: values.businessName,
             phone: values.phone,
@@ -97,25 +97,12 @@ const SignupPage = () => {
 
       if (dbError) throw dbError;
 
-      // Check if email confirmation is required
-      if (data.user && !data.session) {
-        // Email confirmation required
-        alert(
-          "✅ Account created successfully!\n\n" +
-            "📧 Please check your email and click the confirmation link to activate your account.\n\n" +
-            "💡 Tip: Check your spam folder if you don't see it."
-        );
-      } else {
-        // Email confirmation disabled or auto-confirmed
-        alert(
-          "✅ Account created successfully! Redirecting to dashboard..."
-        );
-        window.location.href = Route.DASHBOARD;
-      }
+      // No alerts: always move to a confirmation page.
+      window.location.href = "/register/confirmation";
 
       form.reset();
-    } catch (err) {
-      setErrorMsg(err.message || "Signup failed. Try again.");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Signup failed. Try again.");
     } finally {
       setLoading(false);
     }

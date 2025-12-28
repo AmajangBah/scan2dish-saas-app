@@ -1,9 +1,9 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 const CreateTableSchema = z.object({
   table_number: z.string().min(1, "Table number is required"),
@@ -30,13 +30,10 @@ export interface TableActionResult {
 export async function createTable(input: CreateTableInput): Promise<TableActionResult> {
   try {
     const validated = CreateTableSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("restaurant_tables")
@@ -78,13 +75,10 @@ export async function updateTableStatus(
 ): Promise<TableActionResult> {
   try {
     const validated = UpdateTableStatusSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("restaurant_tables")
@@ -114,13 +108,10 @@ export async function updateTableStatus(
  */
 export async function deleteTable(id: string): Promise<TableActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("restaurant_tables")
@@ -153,13 +144,10 @@ export async function toggleTableActive(
   is_active: boolean
 ): Promise<TableActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("restaurant_tables")

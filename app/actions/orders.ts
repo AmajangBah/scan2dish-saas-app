@@ -34,7 +34,7 @@ export async function createOrder(
   try {
     // 1. Validate input schema
     const validatedInput = CreateOrderSchema.parse(input);
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // 2. Validate table exists and is active
     const table = await validateTable(validatedInput.table_id);

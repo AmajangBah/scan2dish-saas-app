@@ -4,26 +4,12 @@ import {
   getCategorySales,
   getWeeklySales,
 } from "@/app/actions/analytics";
-import { getRestaurantId } from "@/lib/getRestaurantId";
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
 import AnalyticsClient from "./AnalyticsClient";
 
 export default async function AnalyticsPage() {
-  const restaurant_id = await getRestaurantId();
-
-  if (!restaurant_id) {
-    return (
-      <div className="p-6 min-h-screen">
-        <div className="text-center text-red-600">
-          Unable to load restaurant data. Please log in again.
-        </div>
-      </div>
-    );
-  }
-
-  // Fetch restaurant currency
-  const { getRestaurantProfile } = await import("@/app/actions/restaurant");
-  const profileResult = await getRestaurantProfile();
-  const currency = profileResult.success && profileResult.data ? profileResult.data.currency : "GMD";
+  const ctx = await requireRestaurantPage();
+  const currency = ctx.restaurant.currency || "GMD";
 
   // Fetch all analytics data in parallel
   const [kpis, topItems, categorySales, weeklySales] = await Promise.all([

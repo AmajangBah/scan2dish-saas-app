@@ -16,6 +16,7 @@ import {
   deleteMenuItem,
   toggleMenuItemAvailability,
 } from "@/app/actions/menu";
+import type { MenuActionResult } from "@/app/actions/menu";
 
 export default function MenuClient({
   initialMenuItems,
@@ -110,7 +111,7 @@ export default function MenuClient({
     }
 
     startTransition(async () => {
-      let result;
+      let result: MenuActionResult;
       if (exists) {
         // Update existing
         result = await updateMenuItem(item.id, {

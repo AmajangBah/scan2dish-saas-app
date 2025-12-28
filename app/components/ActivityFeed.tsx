@@ -25,7 +25,7 @@ export default function ActivityFeed({ activities }: Props) {
             >
               <div className="flex items-center gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src={firstItem?.image || ""} />
+                  <AvatarImage src="" />
                   <AvatarFallback className="bg-orange-100 text-orange-700">
                     {fallback}
                   </AvatarFallback>

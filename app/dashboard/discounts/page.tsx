@@ -1,21 +1,39 @@
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import { getDiscounts } from "@/app/actions/discounts";
 import DiscountsClient from "./DiscountsClient";
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
+import { createServerSupabase } from "@/lib/supabase/server";
 
 export default async function DiscountsPage() {
-  const restaurant_id = await getRestaurantId();
-
-  if (!restaurant_id) {
-    return (
-      <div className="p-6 min-h-screen">
-        <div className="text-center text-red-600">
-          Unable to load restaurant data. Please log in again.
-        </div>
-      </div>
-    );
-  }
+  const ctx = await requireRestaurantPage();
 
   const discounts = await getDiscounts();
+  const supabase = await createServerSupabase();
 
-  return <DiscountsClient initialDiscounts={discounts} />;
+  const { data: menuItems } = await supabase
+    .from("menu_items")
+    .select("id, name, category")
+    .eq("restaurant_id", ctx.restaurant.id)
+    .order("name", { ascending: true });
+
+  const availableCategories = Array.from(
+    new Set(
+      (menuItems || [])
+        .map((m) => (m.category ? String(m.category) : ""))
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b));
+
+  const availableItems = (menuItems || []).map((m) => ({
+    id: String(m.id),
+    name: String(m.name),
+  }));
+
+  return (
+    <DiscountsClient
+      initialDiscounts={discounts}
+      currency={ctx.restaurant.currency || "GMD"}
+      availableCategories={availableCategories}
+      availableItems={availableItems}
+    />
+  );
 }

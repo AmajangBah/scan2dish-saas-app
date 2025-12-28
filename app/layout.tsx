@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getLocale, getMessages } from "next-intl/server";
 import { Toaster } from "sonner";
 import "./globals.css";
 
@@ -23,14 +23,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { locale?: string };
 }>) {
   // Get messages for the current locale
-  const locale = params?.locale || "en";
-  const messages = await getMessages({ locale });
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
     <html lang={locale} className="scroll-smooth">

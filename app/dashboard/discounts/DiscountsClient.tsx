@@ -19,10 +19,16 @@ import {
 
 interface DiscountsClientProps {
   initialDiscounts: Discount[];
+  currency: string;
+  availableCategories: string[];
+  availableItems: Array<{ id: string; name: string }>;
 }
 
 export default function DiscountsClient({
   initialDiscounts,
+  currency,
+  availableCategories,
+  availableItems,
 }: DiscountsClientProps) {
   const [discounts, setDiscounts] = useState<Discount[]>(initialDiscounts);
   const [createOpen, setCreateOpen] = useState(false);
@@ -32,6 +38,8 @@ export default function DiscountsClient({
     discount_type: "percentage",
     discount_value: 10,
     apply_to: "all",
+    category_id: null,
+    item_id: null,
     is_active: true,
   });
 
@@ -49,6 +57,8 @@ export default function DiscountsClient({
           discount_type: "percentage",
           discount_value: 10,
           apply_to: "all",
+          category_id: null,
+          item_id: null,
           is_active: true,
         });
         // Refresh will happen via revalidatePath
@@ -384,7 +394,7 @@ export default function DiscountsClient({
               <p className="text-xs text-gray-500 mt-1">
                 {formData.discount_type === "percentage"
                   ? "Enter percentage (e.g., 10 for 10% off)"
-                  : "Enter amount (e.g., 5 for D5 off)"}
+                  : `Enter amount (e.g., 5 for ${currency} 5 off)`}
               </p>
             </div>
 
@@ -396,17 +406,79 @@ export default function DiscountsClient({
                 className="w-full p-2 border rounded-lg"
                 value={formData.apply_to}
                 onChange={(e) =>
-                  setFormData({ ...formData, apply_to: e.target.value as "all" | "category" | "item" })
+                  setFormData({
+                    ...formData,
+                    apply_to: e.target.value as "all" | "category" | "item",
+                    category_id: e.target.value === "category" ? formData.category_id : null,
+                    item_id: e.target.value === "item" ? formData.item_id : null,
+                  })
                 }
               >
                 <option value="all">All Items</option>
                 <option value="category">Specific Category</option>
                 <option value="item">Specific Item</option>
               </select>
-              <p className="text-xs text-gray-500 mt-1">
-                Category and item-specific discounts coming soon
-              </p>
             </div>
+
+            {formData.apply_to === "category" && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Category
+                </label>
+                <select
+                  className="w-full p-2 border rounded-lg"
+                  value={formData.category_id || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category_id: e.target.value || null })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select a category
+                  </option>
+                  {availableCategories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                {availableCategories.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No categories found. Add categories to your menu first.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {formData.apply_to === "item" && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Menu Item
+                </label>
+                <select
+                  className="w-full p-2 border rounded-lg"
+                  value={formData.item_id || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, item_id: e.target.value || null })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select an item
+                  </option>
+                  {availableItems.map((it) => (
+                    <option key={it.id} value={it.id}>
+                      {it.name}
+                    </option>
+                  ))}
+                </select>
+                {availableItems.length === 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    No menu items found. Add menu items first.
+                  </p>
+                )}
+              </div>
+            )}
 
             <div className="flex items-center gap-2">
               <input

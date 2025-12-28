@@ -1,10 +1,10 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { Discount } from "@/types/discounts";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -45,13 +45,10 @@ export async function createDiscount(
 ): Promise<DiscountActionResult> {
   try {
     const validated = CreateDiscountSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("discounts")
@@ -94,13 +91,10 @@ export async function updateDiscount(
   input: Partial<CreateDiscountInput>
 ): Promise<DiscountActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("discounts")
@@ -130,13 +124,10 @@ export async function updateDiscount(
  */
 export async function deleteDiscount(id: string): Promise<DiscountActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("discounts")
@@ -169,13 +160,10 @@ export async function toggleDiscountActive(
   is_active: boolean
 ): Promise<DiscountActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("discounts")
@@ -205,13 +193,10 @@ export async function toggleDiscountActive(
  */
 export async function getDiscounts(): Promise<Discount[]> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return [];
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("discounts")

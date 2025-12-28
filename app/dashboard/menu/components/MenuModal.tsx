@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { X, Sparkles } from "lucide-react";
-import Cropper from "react-easy-crop";
+import Cropper, { type Area } from "react-easy-crop";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 import { useState, useEffect, DragEvent } from "react";
@@ -40,7 +40,7 @@ export default function MenuModal({
   // Images + crop
   const [images, setImages] = useState<string[]>([]);
   const [cropImage, setCropImage] = useState<string | null>(null);
-  const [croppedArea, setCroppedArea] = useState(null);
+  const [croppedArea, setCroppedArea] = useState<Area | null>(null);
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);

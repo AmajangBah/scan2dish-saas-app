@@ -3,9 +3,9 @@
 import { useParams } from "next/navigation";
 
 export default function WelcomeHeader({
-  restaurantName = "Amie’s Kitchen",
+  restaurantName,
 }: {
-  restaurantName?: string;
+  restaurantName: string;
 }) {
   const { tableId } = useParams();
 

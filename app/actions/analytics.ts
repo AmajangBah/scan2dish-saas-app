@@ -1,7 +1,7 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 export interface AnalyticsKPIs {
   totalOrders: number;
@@ -31,10 +31,10 @@ export interface WeeklySalesData {
  */
 export async function getAnalyticsKPIs(): Promise<AnalyticsKPIs | null> {
   try {
-    const restaurant_id = await getRestaurantId();
-    if (!restaurant_id) return null;
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Total orders
     const { count: totalOrders } = await supabase
@@ -83,10 +83,10 @@ export async function getTopSellingItems(
   limit: number = 5
 ): Promise<TopSellingItem[]> {
   try {
-    const restaurant_id = await getRestaurantId();
-    if (!restaurant_id) return [];
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Fetch all completed orders
     const { data: orders } = await supabase
@@ -138,10 +138,10 @@ export async function getTopSellingItems(
  */
 export async function getCategorySales(): Promise<CategorySales[]> {
   try {
-    const restaurant_id = await getRestaurantId();
-    if (!restaurant_id) return [];
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Fetch all menu items with categories
     const { data: menuItems } = await supabase
@@ -198,10 +198,10 @@ export async function getCategorySales(): Promise<CategorySales[]> {
  */
 export async function getWeeklySales(): Promise<WeeklySalesData[]> {
   try {
-    const restaurant_id = await getRestaurantId();
-    if (!restaurant_id) return [];
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Get orders from last 7 days
     const sevenDaysAgo = new Date();

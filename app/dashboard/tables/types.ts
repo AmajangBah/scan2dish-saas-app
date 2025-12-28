@@ -3,9 +3,9 @@ export type TableStatus = "available" | "occupied" | "reserved" | "cleaning";
 export interface Table {
   id: string;
   number: string;
-  capacity: number;
+  capacity: number | null;
   status: TableStatus;
-  location: string;
+  location: string | null;
   qrAssigned: boolean;
   qrScans: number;
 }

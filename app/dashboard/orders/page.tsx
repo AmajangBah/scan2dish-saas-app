@@ -1,22 +1,13 @@
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
 import OrdersClient from "./OrdersClient";
 import { Order } from "./types";
 
 export default async function OrdersPage() {
-  const restaurant_id = await getRestaurantId();
-  
-  if (!restaurant_id) {
-    return (
-      <div className="p-6 bg-gray-50 min-h-screen">
-        <div className="text-center text-red-600">
-          Unable to load restaurant data. Please log in again.
-        </div>
-      </div>
-    );
-  }
+  const ctx = await requireRestaurantPage();
+  const restaurant_id = ctx.restaurant.id;
 
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   // Fetch orders with table information
   const { data: orders, error } = await supabase
@@ -52,9 +43,16 @@ export default async function OrdersPage() {
       price: parseFloat(String(item.price || 0)),
     }));
 
+    const rt = (o as any).restaurant_tables as
+      | { table_number?: string }[]
+      | { table_number?: string }
+      | null
+      | undefined;
+    const tableNumber = Array.isArray(rt) ? rt[0]?.table_number : rt?.table_number;
+
     return {
       id: o.id,
-      table: o.restaurant_tables?.table_number || "Unknown",
+      table: tableNumber || "Unknown",
       status: o.status as "pending" | "preparing" | "completed",
       total: parseFloat(o.total || 0).toFixed(2),
       time: new Date(o.created_at).toLocaleTimeString("en-US", {

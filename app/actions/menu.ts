@@ -1,9 +1,9 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 const MenuItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -16,7 +16,7 @@ const MenuItemSchema = z.object({
     spicy: z.boolean().default(false),
     vegetarian: z.boolean().default(false),
     glutenFree: z.boolean().default(false),
-  }).default({}),
+  }).default({ spicy: false, vegetarian: false, glutenFree: false }),
   variants: z.array(z.object({
     label: z.string(),
     price: z.number(),
@@ -37,13 +37,10 @@ export interface MenuActionResult {
 export async function createMenuItem(input: MenuItemInput): Promise<MenuActionResult> {
   try {
     const validated = MenuItemSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("menu_items")
@@ -87,24 +84,22 @@ export async function updateMenuItem(
   input: Partial<MenuItemInput>
 ): Promise<MenuActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const validated = MenuItemSchema.partial().parse(input);
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Build update object with only provided fields
-    const updateData: Partial<typeof validated> = {};
-    if (input.name !== undefined) updateData.name = input.name;
-    if (input.description !== undefined) updateData.description = input.description;
-    if (input.price !== undefined) updateData.price = input.price;
-    if (input.category !== undefined) updateData.category = input.category;
-    if (input.images !== undefined) updateData.images = input.images;
-    if (input.available !== undefined) updateData.available = input.available;
-    if (input.tags !== undefined) updateData.tags = input.tags;
-    if (input.variants !== undefined) updateData.variants = input.variants;
+    const updateData: Partial<MenuItemInput> = {};
+    if (validated.name !== undefined) updateData.name = validated.name;
+    if (validated.description !== undefined) updateData.description = validated.description;
+    if (validated.price !== undefined) updateData.price = validated.price;
+    if (validated.category !== undefined) updateData.category = validated.category;
+    if (validated.images !== undefined) updateData.images = validated.images;
+    if (validated.available !== undefined) updateData.available = validated.available;
+    if (validated.tags !== undefined) updateData.tags = validated.tags;
+    if (validated.variants !== undefined) updateData.variants = validated.variants;
 
     const { error } = await supabase
       .from("menu_items")
@@ -135,13 +130,10 @@ export async function updateMenuItem(
  */
 export async function deleteMenuItem(id: string): Promise<MenuActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("menu_items")
@@ -175,13 +167,10 @@ export async function toggleMenuItemAvailability(
   available: boolean
 ): Promise<MenuActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("menu_items")

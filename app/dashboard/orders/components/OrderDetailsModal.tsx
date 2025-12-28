@@ -15,7 +15,7 @@ interface OrderDetailsModalProps {
   open: boolean;
   onClose: () => void;
   order: Order | null;
-  onStatusChange: (id: number, newStatus: OrderStatus) => void;
+  onStatusChange: (id: string, newStatus: OrderStatus) => void;
 }
 
 export default function OrderDetailsModal({
