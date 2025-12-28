@@ -29,7 +29,7 @@ export default function TableCard({
         <div className="flex justify-between">
           <div>
             <CardTitle>Table {table.number}</CardTitle>
-            <p className="text-sm text-muted-foreground">{table.location}</p>
+            <p className="text-sm text-muted-foreground">{table.location || "—"}</p>
           </div>
 
           <Badge className={getStatusColor(table.status)}>{table.status}</Badge>
@@ -37,7 +37,7 @@ export default function TableCard({
       </CardHeader>
 
       <CardContent>
-        <p>Capacity: {table.capacity}</p>
+        <p>Capacity: {table.capacity ?? "—"}</p>
 
         {table.qrAssigned && (
           <div className="flex items-center text-sm text-muted-foreground">

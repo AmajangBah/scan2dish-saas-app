@@ -1,9 +1,9 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -30,7 +30,7 @@ export type UpdateBrandingInput = z.infer<typeof UpdateBrandingSchema>;
 export interface RestaurantActionResult {
   success: boolean;
   error?: string;
-  data?: any;
+  data?: unknown;
 }
 
 // ============================================================================
@@ -45,11 +45,8 @@ export async function updateBusinessProfile(
 ): Promise<RestaurantActionResult> {
   try {
     const validated = UpdateBusinessProfileSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const supabase = await createServerSupabase();
 
@@ -107,11 +104,8 @@ export async function updateBranding(
 ): Promise<RestaurantActionResult> {
   try {
     const validated = UpdateBrandingSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const supabase = await createServerSupabase();
 
@@ -147,13 +141,12 @@ export async function updateBranding(
  */
 export async function getRestaurantProfile(): Promise<RestaurantActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
     const supabase = await createServerSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const { data, error } = await supabase
       .from("restaurants")
@@ -166,7 +159,13 @@ export async function getRestaurantProfile(): Promise<RestaurantActionResult> {
       return { success: false, error: error.message };
     }
 
-    return { success: true, data };
+    return {
+      success: true,
+      data: {
+        ...data,
+        email: user?.email || "",
+      },
+    };
   } catch (error) {
     console.error("Get restaurant profile error:", error);
     return {

@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 const UpdateOrderStatusSchema = z.object({
   order_id: z.string().uuid(),
@@ -26,10 +26,8 @@ export async function updateOrderStatus(
     const validated = UpdateOrderStatusSchema.parse(input);
     const supabase = await createServerSupabase();
 
-    const restaurant_id = await getRestaurantId();
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const { error } = await supabase
       .from("orders")

@@ -1,20 +1,11 @@
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import TablesClient from "./TablesClient";
 import { Table, TableStatus } from "./types";
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
 
 export default async function TablesPage() {
-  const restaurant_id = await getRestaurantId();
-
-  if (!restaurant_id) {
-    return (
-      <div className="p-6 min-h-screen">
-        <div className="text-center text-red-600">
-          Unable to load restaurant data. Please log in again.
-        </div>
-      </div>
-    );
-  }
+  const ctx = await requireRestaurantPage();
+  const restaurant_id = ctx.restaurant.id;
 
   const supabase = await createServerSupabase();
 
@@ -38,12 +29,12 @@ export default async function TablesPage() {
   // Map database tables to UI Table type
   const mappedTables: Table[] = (tables || []).map((table) => ({
     id: table.id,
-    number: table.table_number || "?",
-    capacity: table.capacity || 4,
+    number: table.table_number ?? "",
+    capacity: table.capacity ?? 0,
     status: (table.status || "available") as TableStatus,
-    location: table.location || "Main Floor",
-    qrAssigned: table.qr_assigned ?? true,
-    qrScans: table.qr_scans || 0,
+    location: table.location ?? "",
+    qrAssigned: table.qr_assigned ?? false,
+    qrScans: table.qr_scans ?? 0,
   }));
 
   return <TablesClient initialTables={mappedTables} />;

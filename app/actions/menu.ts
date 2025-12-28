@@ -1,9 +1,9 @@
 "use server";
 
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { requireRestaurant } from "@/lib/auth/restaurant";
 
 const MenuItemSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -37,11 +37,8 @@ export interface MenuActionResult {
 export async function createMenuItem(input: MenuItemInput): Promise<MenuActionResult> {
   try {
     const validated = MenuItemSchema.parse(input);
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const supabase = await createServerSupabase();
 
@@ -88,11 +85,8 @@ export async function updateMenuItem(
 ): Promise<MenuActionResult> {
   try {
     const validated = MenuItemSchema.partial().parse(input);
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const supabase = await createServerSupabase();
 
@@ -136,11 +130,8 @@ export async function updateMenuItem(
  */
 export async function deleteMenuItem(id: string): Promise<MenuActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const supabase = await createServerSupabase();
 
@@ -176,11 +167,8 @@ export async function toggleMenuItemAvailability(
   available: boolean
 ): Promise<MenuActionResult> {
   try {
-    const restaurant_id = await getRestaurantId();
-
-    if (!restaurant_id) {
-      return { success: false, error: "Unauthorized" };
-    }
+    const ctx = await requireRestaurant();
+    const restaurant_id = ctx.restaurant.id;
 
     const supabase = await createServerSupabase();
 

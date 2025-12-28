@@ -34,9 +34,10 @@ export default function PreferencesSection() {
       setError(null);
       const result = await getRestaurantProfile();
       if (result.success && result.data) {
-        setName(result.data.name || "");
-        setCurrency(result.data.currency || "GMD");
-        setBrandColor(result.data.brand_color || "#C84501");
+        const data = result.data as any;
+        setName(data.name || "");
+        setCurrency(data.currency || "GMD");
+        setBrandColor(data.brand_color || "#C84501");
       } else {
         setError(result.error || "Failed to load preferences");
       }
