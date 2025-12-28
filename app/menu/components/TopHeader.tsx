@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ShoppingCart, Globe } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { Button } from "@/components/ui/button";
 
 export default function TopHeader({
-  title = "Amie’s Kitchen",
+  title,
 }: {
-  title?: string;
+  title: string;
 }) {
   const { tableId } = useParams();
   const { items } = useCart();

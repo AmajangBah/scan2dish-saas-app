@@ -6,6 +6,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
+import TopHeader from "../components/TopHeader";
 
 export default async function MenuLayout({
   children,
@@ -94,5 +95,10 @@ export default async function MenuLayout({
   }
 
   // Restaurant is active - allow access
-  return <>{children}</>;
+  return (
+    <>
+      <TopHeader title={restaurant?.name ?? ""} />
+      {children}
+    </>
+  );
 }
