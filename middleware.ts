@@ -58,21 +58,30 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protect admin routes
-  if (request.nextUrl.pathname.startsWith("/admin")) {
-    if (!user) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  const ADMIN_SIGN_IN_PATH = "/auth/admin/sign-in";
 
-    // Check if user is admin
+  async function isAdminUser(): Promise<boolean> {
+    if (!user) return false;
     const { data: adminUser } = await supabase
       .from("admin_users")
       .select("id, is_active")
       .eq("user_id", user.id)
       .eq("is_active", true)
       .single();
+
+    return !!adminUser;
+  }
+
+  // Protect admin routes
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      const loginUrl = new URL(ADMIN_SIGN_IN_PATH, request.url);
+      loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // Check if user is admin
+    const adminUser = await isAdminUser();
 
     if (!adminUser) {
       // Not an admin - redirect to regular dashboard
@@ -88,21 +97,47 @@ export async function middleware(request: NextRequest) {
       loginUrl.searchParams.set("redirect", request.nextUrl.pathname);
       return NextResponse.redirect(loginUrl);
     }
+
+    // Hard separation: admins cannot use restaurant dashboard routes
+    if (await isAdminUser()) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+
+    // Enforce onboarding completion before any dashboard access
+    const { data: restaurant } = await supabase
+      .from("restaurants")
+      .select("id")
+      .eq("user_id", user.id)
+      .single();
+
+    if (!restaurant?.id) {
+      // No restaurant record - treat as unauthenticated for restaurant UX
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    const { data: onboarding } = await supabase
+      .from("onboarding_progress")
+      .select("completed, skipped")
+      .eq("restaurant_id", restaurant.id)
+      .maybeSingle();
+
+    const onboardingCompleted = !!(onboarding?.completed || onboarding?.skipped);
+    if (!onboardingCompleted && request.nextUrl.pathname !== "/onboarding") {
+      const url = new URL("/onboarding", request.url);
+      url.searchParams.set("redirect", request.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
   }
 
   // Redirect authenticated users away from auth pages
   if (
     (request.nextUrl.pathname === "/login" ||
-      request.nextUrl.pathname === "/register") &&
+      request.nextUrl.pathname === "/register" ||
+      request.nextUrl.pathname === ADMIN_SIGN_IN_PATH) &&
     user
   ) {
     // Check if admin
-    const { data: adminUser } = await supabase
-      .from("admin_users")
-      .select("id, is_active")
-      .eq("user_id", user.id)
-      .eq("is_active", true)
-      .single();
+    const adminUser = await isAdminUser();
 
     if (adminUser) {
       return NextResponse.redirect(new URL("/admin", request.url));

@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
  * GET /logout
  */
 export async function GET(request: Request) {
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   // Sign out the user
   await supabase.auth.signOut();

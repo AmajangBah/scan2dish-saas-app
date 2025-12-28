@@ -25,12 +25,12 @@ import {
 import Route from "../constants/Route";
 import SideBarLink from "./SideBarLink";
 
-const RestaurantSidebar = () => {
+const RestaurantSidebar = ({ restaurantName }: { restaurantName: string }) => {
   return (
     <Sidebar collapsible="icon">
       {/* HEADER */}
       <SidebarHeader className="border-b px-4 py-6">
-        <h2 className="text-xl font-bold">Amie's kitchen</h2>
+        <h2 className="text-xl font-bold">{restaurantName}</h2>
       </SidebarHeader>
 
       {/* MAIN NAV */}

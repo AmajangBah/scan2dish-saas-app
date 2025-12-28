@@ -11,45 +11,93 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { getCurrencyOptions } from "@/lib/utils/currency";
+import { getRestaurantProfile, updateBusinessProfile } from "@/app/actions/restaurant";
 
 export default function PreferencesSection() {
-  const [color, setColor] = useState("#ff9800");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const [name, setName] = useState("");
+  const [currency, setCurrency] = useState("GMD");
+  const [brandColor, setBrandColor] = useState("#C84501");
+
+  const currencyOptions = getCurrencyOptions();
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true);
+      setError(null);
+      const result = await getRestaurantProfile();
+      if (result.success && result.data) {
+        setName(result.data.name || "");
+        setCurrency(result.data.currency || "GMD");
+        setBrandColor(result.data.brand_color || "#C84501");
+      } else {
+        setError(result.error || "Failed to load preferences");
+      }
+      setLoading(false);
+    }
+    load();
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setError(null);
+    setSuccess(false);
+
+    const result = await updateBusinessProfile({
+      name,
+      currency: currency as any,
+      brand_color: brandColor,
+    });
+
+    setSaving(false);
+    if (result.success) {
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 2500);
+    } else {
+      setError(result.error || "Failed to save changes");
+    }
+  };
 
   return (
     <div className="p-6 space-y-10 max-w-md">
       <h2 className="text-2xl font-semibold">Preferences</h2>
 
+      {loading && (
+        <div className="text-sm text-gray-500">Loading…</div>
+      )}
+      {error && (
+        <div className="text-sm text-red-600">{error}</div>
+      )}
+      {success && (
+        <div className="text-sm text-green-700">✓ Saved</div>
+      )}
+
       {/* Language */}
       <div className="space-y-2">
         <Label>Language</Label>
-        <Select defaultValue="en">
-          <SelectTrigger>
-            <SelectValue placeholder="Select language" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="en">English</SelectItem>
-            <SelectItem value="fr">French</SelectItem>
-            <SelectItem value="ar">Arabic</SelectItem>
-          </SelectContent>
-        </Select>
+        <LanguageSwitcher />
       </div>
 
-      {/* Currency (West African) */}
+      {/* Currency */}
       <div className="space-y-2">
         <Label>Currency</Label>
-        <Select defaultValue="gmd">
+        <Select value={currency} onValueChange={setCurrency}>
           <SelectTrigger>
             <SelectValue placeholder="Select currency" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="gmd">GMD (Dalasi - Gambia)</SelectItem>
-            <SelectItem value="ngn">NGN (Naira - Nigeria)</SelectItem>
-            <SelectItem value="ghs">GHS (Cedi - Ghana)</SelectItem>
-            <SelectItem value="xof">
-              XOF (CFA Franc - Senegal/West Africa)
-            </SelectItem>
-            <SelectItem value="sll">SLL (Leone - Sierra Leone)</SelectItem>
+            {currencyOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -60,8 +108,8 @@ export default function PreferencesSection() {
         <Input
           type="color"
           className="h-12 w-24 p-0 border-none"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
+          value={brandColor}
+          onChange={(e) => setBrandColor(e.target.value)}
         />
         <p className="text-xs text-muted-foreground">
           This color will be applied to buttons and headers on the customer
@@ -77,10 +125,12 @@ export default function PreferencesSection() {
             Receive a sound alert when new orders are placed.
           </p>
         </div>
-        <Switch defaultChecked />
+        <Switch disabled />
       </div>
 
-      <Button className="w-full mt-4">Save Changes</Button>
+      <Button className="w-full mt-4" onClick={handleSave} disabled={saving || loading}>
+        {saving ? "Saving..." : "Save Changes"}
+      </Button>
     </div>
   );
 }

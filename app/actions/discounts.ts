@@ -51,7 +51,7 @@ export async function createDiscount(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("discounts")
@@ -100,7 +100,7 @@ export async function updateDiscount(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("discounts")
@@ -136,7 +136,7 @@ export async function deleteDiscount(id: string): Promise<DiscountActionResult> 
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("discounts")
@@ -175,7 +175,7 @@ export async function toggleDiscountActive(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("discounts")
@@ -211,7 +211,7 @@ export async function getDiscounts(): Promise<Discount[]> {
       return [];
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("discounts")

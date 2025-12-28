@@ -51,7 +51,7 @@ export async function updateBusinessProfile(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const updateData: {
       name: string;
@@ -113,7 +113,7 @@ export async function updateBranding(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("restaurants")
@@ -153,7 +153,7 @@ export async function getRestaurantProfile(): Promise<RestaurantActionResult> {
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("restaurants")

@@ -16,7 +16,7 @@ export default async function TablesPage() {
     );
   }
 
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const { data: tables, error } = await supabase
     .from("restaurant_tables")

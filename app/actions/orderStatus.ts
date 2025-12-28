@@ -24,7 +24,7 @@ export async function updateOrderStatus(
 ): Promise<UpdateOrderStatusResult> {
   try {
     const validated = UpdateOrderStatusSchema.parse(input);
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const restaurant_id = await getRestaurantId();
     if (!restaurant_id) {

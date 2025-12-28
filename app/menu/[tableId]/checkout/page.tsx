@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useCart } from "../../context/CartContext";
 import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/lib/utils/currency";
 
 export default function CheckoutPage() {
   const { tableId } = useParams();

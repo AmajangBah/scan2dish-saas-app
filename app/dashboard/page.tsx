@@ -5,23 +5,13 @@ import { ShoppingBag, DollarSign, Utensils, Timer } from "lucide-react";
 import ActivityFeed from "../components/ActivityFeed";
 import { ActivityItem } from "@/types/activity";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
-import OnboardingWizard from "@/components/onboarding/OnboardingWizard";
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
 
 export default async function Dashboard() {
-  const restaurant_id = await getRestaurantId();
+  const ctx = await requireRestaurantPage();
+  const restaurant_id = ctx.restaurant.id;
 
-  if (!restaurant_id) {
-    return (
-      <section className="p-6 w-full">
-        <div className="text-center text-red-600">
-          Unable to load dashboard. Please log in again.
-        </div>
-      </section>
-    );
-  }
-
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   // Fetch restaurant name
   const { data: restaurant } = await supabase
@@ -75,9 +65,15 @@ export default async function Dashboard() {
   const activityData: ActivityItem[] =
     recentOrders?.map((order) => {
       const items = Array.isArray(order.items) ? order.items : [];
+      const rt = (order as any).restaurant_tables as
+        | { table_number?: string }[]
+        | { table_number?: string }
+        | null
+        | undefined;
+      const tableNumber = Array.isArray(rt) ? rt[0]?.table_number : rt?.table_number;
       return {
         id: order.id,
-        table: parseInt(order.restaurant_tables?.table_number || "0"),
+        table: parseInt(tableNumber || "0"),
         time: new Date(order.created_at).toLocaleTimeString("en-US", {
           hour: "numeric",
           minute: "2-digit",
@@ -92,9 +88,6 @@ export default async function Dashboard() {
 
   return (
     <section className="p-6 w-full space-y-6">
-      {/* Onboarding Wizard */}
-      <OnboardingWizard />
-      
       {/* Header */}
       <div>
         <h1 className="text-4xl font-bold my-4">

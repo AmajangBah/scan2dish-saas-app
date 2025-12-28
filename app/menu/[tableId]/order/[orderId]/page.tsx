@@ -9,7 +9,7 @@ export default async function OrderTracker({
   params: { tableId: string; orderId: string };
 }) {
   const { tableId, orderId } = params;
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   // Fetch the order
   const { data: order, error } = await supabase
@@ -66,6 +66,12 @@ export default async function OrderTracker({
   // Get items summary
   const items = Array.isArray(order.items) ? order.items : [];
   const itemCount = items.reduce((sum: number, item: {quantity?: number}) => sum + (item.quantity || 1), 0);
+  const rt = (order as any).restaurant_tables as
+    | { table_number?: string }[]
+    | { table_number?: string }
+    | null
+    | undefined;
+  const tableNumber = Array.isArray(rt) ? rt[0]?.table_number : rt?.table_number;
 
   return (
     <div className="min-h-screen pb-28 px-4 pt-6">
@@ -74,7 +80,7 @@ export default async function OrderTracker({
           Order Tracking
         </h2>
         <p className="text-center text-gray-600 text-sm mb-6">
-          Table {order.restaurant_tables?.table_number} • {itemCount} {itemCount === 1 ? "item" : "items"}
+          Table {tableNumber} • {itemCount} {itemCount === 1 ? "item" : "items"}
         </p>
 
         <div className="bg-white p-6 rounded-2xl shadow">

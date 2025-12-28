@@ -36,7 +36,7 @@ export async function createTable(input: CreateTableInput): Promise<TableActionR
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("restaurant_tables")
@@ -84,7 +84,7 @@ export async function updateTableStatus(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("restaurant_tables")
@@ -120,7 +120,7 @@ export async function deleteTable(id: string): Promise<TableActionResult> {
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("restaurant_tables")
@@ -159,7 +159,7 @@ export async function toggleTableActive(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { error } = await supabase
       .from("restaurant_tables")

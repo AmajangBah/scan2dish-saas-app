@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
  * Creates a Supabase client for server-side usage (Server Components, API Routes, Server Actions)
  * Properly handles cookies for authentication in Next.js App Router
  */
-export function createServerSupabase() {
-  const cookieStore = cookies();
+export async function createServerSupabase() {
+  const cookieStore = await cookies();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     throw new Error("Missing Supabase environment variables");
@@ -33,4 +33,12 @@ export function createServerSupabase() {
       },
     }
   );
+}
+
+/**
+ * Backwards-compatible alias used throughout the codebase.
+ * (Some files import `createClient` from "@/lib/supabase/server".)
+ */
+export function createClient() {
+  return createServerSupabase();
 }

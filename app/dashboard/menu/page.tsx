@@ -1,22 +1,13 @@
 import { createServerSupabase } from "@/lib/supabase/server";
-import { getRestaurantId } from "@/lib/getRestaurantId";
+import { requireRestaurantPage } from "@/lib/auth/restaurant";
 import MenuClient from "./MenuClient";
 import { MenuItem, MenuCategory } from "./types";
 
 export default async function MenuPage() {
-  const restaurant_id = await getRestaurantId();
+  const ctx = await requireRestaurantPage();
+  const restaurant_id = ctx.restaurant.id;
 
-  if (!restaurant_id) {
-    return (
-      <div className="p-6 min-h-screen">
-        <div className="text-center text-red-600">
-          Unable to load restaurant data. Please log in again.
-        </div>
-      </div>
-    );
-  }
-
-  const supabase = createServerSupabase();
+  const supabase = await createServerSupabase();
 
   const { data: menuItems, error } = await supabase
     .from("menu_items")

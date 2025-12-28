@@ -34,7 +34,7 @@ export async function getAnalyticsKPIs(): Promise<AnalyticsKPIs | null> {
     const restaurant_id = await getRestaurantId();
     if (!restaurant_id) return null;
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Total orders
     const { count: totalOrders } = await supabase
@@ -86,7 +86,7 @@ export async function getTopSellingItems(
     const restaurant_id = await getRestaurantId();
     if (!restaurant_id) return [];
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Fetch all completed orders
     const { data: orders } = await supabase
@@ -141,7 +141,7 @@ export async function getCategorySales(): Promise<CategorySales[]> {
     const restaurant_id = await getRestaurantId();
     if (!restaurant_id) return [];
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Fetch all menu items with categories
     const { data: menuItems } = await supabase
@@ -201,7 +201,7 @@ export async function getWeeklySales(): Promise<WeeklySalesData[]> {
     const restaurant_id = await getRestaurantId();
     if (!restaurant_id) return [];
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     // Get orders from last 7 days
     const sevenDaysAgo = new Date();

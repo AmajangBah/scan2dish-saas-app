@@ -29,7 +29,7 @@ export async function getOnboardingProgress(): Promise<OnboardingProgress | null
     const restaurant_id = await getRestaurantId();
     if (!restaurant_id) return null;
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("onboarding_progress")
@@ -84,7 +84,7 @@ export async function updateOnboardingProgress(
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("onboarding_progress")
@@ -124,7 +124,7 @@ export async function completeOnboarding(): Promise<OnboardingActionResult> {
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("onboarding_progress")
@@ -164,7 +164,7 @@ export async function skipOnboarding(): Promise<OnboardingActionResult> {
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("onboarding_progress")
@@ -203,7 +203,7 @@ export async function resetOnboarding(): Promise<OnboardingActionResult> {
       return { success: false, error: "Unauthorized" };
     }
 
-    const supabase = createServerSupabase();
+    const supabase = await createServerSupabase();
 
     const { data, error } = await supabase
       .from("onboarding_progress")

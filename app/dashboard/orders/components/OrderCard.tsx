@@ -7,7 +7,7 @@ import { Order, OrderStatus } from "../types";
 interface OrderCardProps {
   order: Order;
   onView: (order: Order) => void;
-  onStatusChange: (id: number, newStatus: OrderStatus) => void;
+  onStatusChange: (id: string, newStatus: OrderStatus) => void;
 }
 
 export default function OrderCard({

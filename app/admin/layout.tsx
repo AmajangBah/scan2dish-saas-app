@@ -25,7 +25,7 @@ export default async function AdminLayout({
   const adminUser = await getAdminUser();
 
   if (!adminUser) {
-    redirect("/dashboard");
+    redirect("/auth/admin/sign-in");
   }
 
   return (
@@ -75,7 +75,7 @@ export default async function AdminLayout({
             "use server";
             const supabase = await createClient();
             await supabase.auth.signOut();
-            redirect("/login");
+            redirect("/auth/admin/sign-in");
           }}>
             <button
               type="submit"
